@@ -1,17 +1,50 @@
 import { Calendar, ChevronLeft, ChevronRight } from 'lucide-react';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { type Vehicle, type Reservation } from '../data/mockData';
+import { getVehicles, getReservations } from '../../lib/queries'; // ako @ ne radi, promeni u '../../lib/queries'
 
 interface VehicleTimelineProps {
   vehicles: Vehicle[];
   reservations: Reservation[];
 }
 
-export function VehicleTimeline({ vehicles, reservations }: VehicleTimelineProps) {
+export function VehicleTimeline({}: VehicleTimelineProps) {
+  const [displayVehicles, setDisplayVehicles] = useState<Vehicle[]>([]);
+  const [displayReservations, setDisplayReservations] = useState<Reservation[]>([]);
   const [weekOffset, setWeekOffset] = useState(0);
   
+  useEffect(() => {
+    async function fetchData() {
+      const realVehicles = await getVehicles();
+      const realReservations = await getReservations();
+
+      // Mapiramo vozila (isto kao ranije)
+      const mappedVehicles = realVehicles.map((v: any) => ({
+        ...v,
+        currentLocation: v.location || null,
+        lastUser: null,
+      }));
+
+      // Mapiramo rezervacije da pašu uz Reservation type (prilagodi ako treba polja)
+      const mappedReservations = realReservations.map((r: any) => ({
+        ...r,
+        vehicleId: r.vehicle_id,
+        startDate: r.start_date,
+        endDate: r.end_date,
+        bookerName: r.booker_name || 'Nepoznat',  // ako imaš join sa profiles, ovde će biti ime
+        sector: r.sector || '',
+        project: r.project || '',
+        // dodaj ostala polja po potrebi (approvedBy itd.)
+      }));
+
+      setDisplayVehicles(mappedVehicles as Vehicle[]);
+      setDisplayReservations(mappedReservations as Reservation[]);
+    }
+    fetchData();
+  }, []);
+
   const getWeekDates = (offset: number) => {
-    const baseDate = new Date(2026, 0, 11); // Jan 11, 2026
+    const baseDate = new Date(); // današnji datum (možeš promeniti u fiksni ako hoćeš)
     const startDate = new Date(baseDate);
     startDate.setDate(baseDate.getDate() + (offset * 7));
     
@@ -29,13 +62,13 @@ export function VehicleTimeline({ vehicles, reservations }: VehicleTimelineProps
   const isVehicleBookedOnDate = (vehicleId: string, date: Date): Reservation | null => {
     const dateStr = date.toISOString().split('T')[0];
     
-    const reservation = reservations.find(res => {
+    const reservation = displayReservations.find(res => {
       if (res.vehicleId !== vehicleId) return false;
       
       const startDate = new Date(res.startDate).toISOString().split('T')[0];
       const endDate = new Date(res.endDate).toISOString().split('T')[0];
       
-      return startDate <= dateStr && endDate >= dateStr;
+      return startDate <= dateStr && endDate >= dateStr && res.status === 'approved';
     });
     
     return reservation || null;
@@ -69,7 +102,7 @@ export function VehicleTimeline({ vehicles, reservations }: VehicleTimelineProps
             <ChevronLeft className="w-4 h-4 text-gray-400" />
           </button>
           <span className="text-gray-400 text-sm px-4">
-            {weekDates[0].toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} - {weekDates[6].toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+            {weekDates[0].toLocaleDateString('sr-RS', { month: 'short', day: 'numeric' })} - {weekDates[6].toLocaleDateString('sr-RS', { month: 'short', day: 'numeric' })}
           </span>
           <button
             onClick={() => setWeekOffset(weekOffset + 1)}
@@ -87,15 +120,15 @@ export function VehicleTimeline({ vehicles, reservations }: VehicleTimelineProps
             <div className="text-gray-400 text-sm font-medium">Vehicle</div>
             {weekDates.map((date, idx) => (
               <div key={idx} className="text-center">
-                <div className="text-gray-400 text-xs">{date.toLocaleDateString('en-US', { weekday: 'short' })}</div>
-                <div className="text-white text-sm font-medium">{date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}</div>
+                <div className="text-gray-400 text-xs">{date.toLocaleDateString('sr-RS', { weekday: 'short' })}</div>
+                <div className="text-white text-sm font-medium">{date.toLocaleDateString('sr-RS', { month: 'short', day: 'numeric' })}</div>
               </div>
             ))}
           </div>
 
           {/* Timeline Grid */}
           <div className="space-y-2">
-            {vehicles.map((vehicle) => (
+            {displayVehicles.map((vehicle) => (
               <div key={vehicle.id} className="grid grid-cols-8 gap-2">
                 <div className="flex flex-col justify-center bg-[#0f1117] border border-gray-700 rounded-lg px-3 py-2">
                   <div className="text-white text-sm font-medium truncate">{vehicle.model}</div>
@@ -126,13 +159,13 @@ export function VehicleTimeline({ vehicles, reservations }: VehicleTimelineProps
                       {/* Tooltip */}
                       {reservation && isHovered && (
                         <div className="absolute z-10 top-full mt-2 left-1/2 -translate-x-1/2 bg-gray-900 border border-gray-700 rounded-lg p-3 shadow-xl min-w-[200px]">
-                          <div className="text-white text-sm font-medium mb-1">{reservation.bookerName}</div>
-                          <div className="text-gray-400 text-xs mb-1">{reservation.sector}</div>
+                          <div className="text-white text-sm font-medium mb-1">{reservation.bookerName || 'Nepoznat korisnik'}</div>
+                          <div className="text-gray-400 text-xs mb-1">{reservation.sector || ''}</div>
                           {reservation.project && (
                             <div className="text-blue-400 text-xs mb-1">{reservation.project}</div>
                           )}
                           <div className="text-gray-500 text-xs mt-2">
-                            {new Date(reservation.startDate).toLocaleDateString()} - {new Date(reservation.endDate).toLocaleDateString()}
+                            {new Date(reservation.startDate).toLocaleDateString('sr-RS')} - {new Date(reservation.endDate).toLocaleDateString('sr-RS')}
                           </div>
                         </div>
                       )}
@@ -147,15 +180,15 @@ export function VehicleTimeline({ vehicles, reservations }: VehicleTimelineProps
           <div className="flex items-center gap-6 mt-6 pt-4 border-t border-gray-800">
             <div className="flex items-center gap-2">
               <div className="w-4 h-4 bg-green-500/10 border border-green-500/30 rounded"></div>
-              <span className="text-gray-400 text-sm">Available</span>
+              <span className="text-gray-400 text-sm">Dostupno</span>
             </div>
             <div className="flex items-center gap-2">
               <div className="w-4 h-4 bg-red-500/20 border border-red-500/50 rounded"></div>
-              <span className="text-gray-400 text-sm">Booked</span>
+              <span className="text-gray-400 text-sm">Rezervisano</span>
             </div>
             <div className="flex items-center gap-2">
               <div className="w-4 h-4 bg-orange-500/20 border border-orange-500/50 rounded"></div>
-              <span className="text-gray-400 text-sm">Pending</span>
+              <span className="text-gray-400 text-sm">Na čekanju</span>
             </div>
           </div>
         </div>

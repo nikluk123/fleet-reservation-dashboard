@@ -1,19 +1,52 @@
-import { X, Calendar, MapPin, User, CheckCircle, Clock } from 'lucide-react';
+import { X, Calendar, MapPin, User, CheckCircle, Clock, Car } from 'lucide-react';  // Dodali smo Car ovde
 import { type Vehicle, type Reservation } from '../data/mockData';
+import { useEffect, useState } from 'react';
+import { getReservations } from '../../lib/queries'; // ako @ ne radi, promeni u '../../lib/queries'
 
 interface VehicleDetailsModalProps {
   isOpen: boolean;
   onClose: () => void;
   vehicle: Vehicle | null;
-  reservations: Reservation[];
+  reservations: Reservation[]; // ovo je mock prop – mi fetch-ujemo prave
   dateRange: { start: string; end: string };
 }
 
-export function VehicleDetailsModal({ isOpen, onClose, vehicle, reservations, dateRange }: VehicleDetailsModalProps) {
+export function VehicleDetailsModal({ isOpen, onClose, vehicle, dateRange }: VehicleDetailsModalProps) {
+  const [displayReservations, setDisplayReservations] = useState<Reservation[]>([]);
+
+  useEffect(() => {
+    async function fetchReservations() {
+      const realReservations = await getReservations();
+
+      // Mapiramo rezervacije da pašu uz Reservation type
+      const mappedReservations = realReservations.map((r: any) => ({
+        ...r,
+        id: r.id,
+        vehicleId: r.vehicle_id,
+        bookerId: r.booker_id,
+        projectId: r.project_id,
+        startDate: r.start_date,
+        endDate: r.end_date,
+        notes: r.notes || '',
+        status: r.status,
+        approvedBy: r.approved_by || null,
+        approvedAt: r.approved_at || null,
+        bookerName: 'Nepoznat korisnik',  // kasnije join sa profiles
+        sector: 'Nepoznat sektor',
+        project: r.project_name || 'Bez projekta',
+      }));
+
+      setDisplayReservations(mappedReservations as Reservation[]);
+    }
+    if (isOpen) {
+      fetchReservations();
+    }
+  }, [isOpen]);
+
   if (!isOpen || !vehicle) return null;
 
-  // Find reservations for this vehicle in the date range
-  const vehicleReservations = reservations.filter(res => {
+  // Filter rezervacija za ovo vozilo u dateRange-u
+  const vehicleReservations = displayReservations.filter(res => {
     if (res.vehicleId !== vehicle.id) return false;
     
     const resStart = new Date(res.startDate);
@@ -65,8 +98,8 @@ export function VehicleDetailsModal({ isOpen, onClose, vehicle, reservations, da
                   <MapPin className="w-5 h-5 text-purple-500" />
                 </div>
                 <div>
-                  <p className="text-gray-400 text-sm">Location</p>
-                  <p className="text-white font-medium">{vehicle.currentLocation || 'Unknown'}</p>
+                  <p className="text-gray-400 text-sm">Lokacija</p>
+                  <p className="text-white font-medium">{vehicle.currentLocation || 'Nepoznato'}</p>
                 </div>
               </div>
             </div>
@@ -74,10 +107,10 @@ export function VehicleDetailsModal({ isOpen, onClose, vehicle, reservations, da
             <div className="bg-[#0f1117] border border-gray-700 rounded-lg p-4">
               <div className="flex items-center gap-3 mb-3">
                 <div className="bg-orange-500/10 p-2 rounded-lg">
-                  <Car className="w-5 h-5 text-orange-500" />
+                  <Car className="w-5 h-5 text-orange-500" />  {/* Sad koristimo lucide Car ikonu */}
                 </div>
                 <div>
-                  <p className="text-gray-400 text-sm">Type</p>
+                  <p className="text-gray-400 text-sm">Tip</p>
                   <p className="text-white font-medium">{vehicle.type}</p>
                 </div>
               </div>
@@ -90,7 +123,7 @@ export function VehicleDetailsModal({ isOpen, onClose, vehicle, reservations, da
                     <User className="w-5 h-5 text-green-500" />
                   </div>
                   <div>
-                    <p className="text-gray-400 text-sm">Last User</p>
+                    <p className="text-gray-400 text-sm">Poslednji korisnik</p>
                     <p className="text-white font-medium">{vehicle.lastUser}</p>
                   </div>
                 </div>
@@ -101,15 +134,15 @@ export function VehicleDetailsModal({ isOpen, onClose, vehicle, reservations, da
           {/* Date Range Status */}
           <div className="border-t border-gray-800 pt-6">
             <h3 className="text-white font-semibold mb-4">
-              Status for {new Date(dateRange.start).toLocaleDateString()} - {new Date(dateRange.end).toLocaleDateString()}
+              Status za {new Date(dateRange.start).toLocaleDateString('sr-RS')} - {new Date(dateRange.end).toLocaleDateString('sr-RS')}
             </h3>
 
             {isAvailable ? (
               <div className="bg-green-500/10 border border-green-500/50 rounded-lg p-4 flex items-center gap-3">
                 <CheckCircle className="w-6 h-6 text-green-500" />
                 <div>
-                  <p className="text-green-500 font-medium">Available</p>
-                  <p className="text-green-400/80 text-sm">This vehicle is available for the selected date range</p>
+                  <p className="text-green-500 font-medium">Dostupno</p>
+                  <p className="text-green-400/80 text-sm">Vozilo je slobodno u izabranom periodu</p>
                 </div>
               </div>
             ) : (
@@ -117,8 +150,8 @@ export function VehicleDetailsModal({ isOpen, onClose, vehicle, reservations, da
                 <div className="bg-red-500/10 border border-red-500/50 rounded-lg p-4 flex items-center gap-3">
                   <Clock className="w-6 h-6 text-red-500" />
                   <div>
-                    <p className="text-red-500 font-medium">Booked</p>
-                    <p className="text-red-400/80 text-sm">This vehicle has {vehicleReservations.length} booking(s) in the selected range</p>
+                    <p className="text-red-500 font-medium">Rezervisano</p>
+                    <p className="text-red-400/80 text-sm">Vozilo ima {vehicleReservations.length} rezervacija(u) u periodu</p>
                   </div>
                 </div>
 
@@ -135,27 +168,27 @@ export function VehicleDetailsModal({ isOpen, onClose, vehicle, reservations, da
                           )}
                         </div>
                         <div className="bg-green-500/10 px-3 py-1 rounded-full">
-                          <p className="text-green-500 text-xs font-medium">Approved</p>
+                          <p className="text-green-500 text-xs font-medium">Odobreno</p>
                         </div>
                       </div>
 
                       <div className="grid grid-cols-2 gap-4 text-sm mb-3">
                         <div>
-                          <p className="text-gray-500">Start</p>
-                          <p className="text-white">{new Date(reservation.startDate).toLocaleString()}</p>
+                          <p className="text-gray-500">Početak</p>
+                          <p className="text-white">{new Date(reservation.startDate).toLocaleString('sr-RS')}</p>
                         </div>
                         <div>
-                          <p className="text-gray-500">End</p>
-                          <p className="text-white">{new Date(reservation.endDate).toLocaleString()}</p>
+                          <p className="text-gray-500">Kraj</p>
+                          <p className="text-white">{new Date(reservation.endDate).toLocaleString('sr-RS')}</p>
                         </div>
                       </div>
 
                       {reservation.approvedBy && (
                         <div className="pt-3 border-t border-gray-700">
                           <p className="text-gray-400 text-sm">
-                            Approved by: <span className="text-white">{reservation.approvedBy}</span>
+                            Odobrio: <span className="text-white">{reservation.approvedBy}</span>
                             {reservation.approvedAt && (
-                              <span className="text-gray-500"> on {new Date(reservation.approvedAt).toLocaleString()}</span>
+                              <span className="text-gray-500"> {new Date(reservation.approvedAt).toLocaleString('sr-RS')}</span>
                             )}
                           </p>
                         </div>
@@ -163,7 +196,7 @@ export function VehicleDetailsModal({ isOpen, onClose, vehicle, reservations, da
 
                       {reservation.notes && (
                         <div className="pt-3 border-t border-gray-700 mt-3">
-                          <p className="text-gray-500 text-sm">Notes:</p>
+                          <p className="text-gray-500 text-sm">Napomene:</p>
                           <p className="text-gray-300 text-sm mt-1">{reservation.notes}</p>
                         </div>
                       )}
@@ -176,13 +209,5 @@ export function VehicleDetailsModal({ isOpen, onClose, vehicle, reservations, da
         </div>
       </div>
     </div>
-  );
-}
-
-function Car({ className }: { className?: string }) {
-  return (
-    <svg className={className} fill="currentColor" viewBox="0 0 24 24">
-      <path d="M18.92 6.01C18.72 5.42 18.16 5 17.5 5h-11c-.66 0-1.21.42-1.42 1.01L3 12v8c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-1h12v1c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-8l-2.08-5.99zM6.5 16c-.83 0-1.5-.67-1.5-1.5S5.67 13 6.5 13s1.5.67 1.5 1.5S7.33 16 6.5 16zm11 0c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5zM5 11l1.5-4.5h11L19 11H5z"/>
-    </svg>
   );
 }

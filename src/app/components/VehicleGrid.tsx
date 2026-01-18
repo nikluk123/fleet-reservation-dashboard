@@ -1,24 +1,41 @@
 import { MapPin, User, Circle } from 'lucide-react';
 import { type Vehicle } from '../data/mockData';
 import { useFleet } from '../context/FleetContext';
+import { useEffect, useState } from 'react';
+import { getVehicles } from '../../lib/queries'; // ako @ ne radi, promeni u '../../lib/queries'
 
 interface VehicleGridProps {
   vehicles: Vehicle[];
   onSelectVehicle: (vehicle: Vehicle) => void;
 }
 
-export function VehicleGrid({ vehicles, onSelectVehicle }: VehicleGridProps) {
+export function VehicleGrid({ onSelectVehicle }: VehicleGridProps) {
   const { reservations } = useFleet();
+  const [displayVehicles, setDisplayVehicles] = useState<Vehicle[]>([]);
+
+  useEffect(() => {
+    async function fetchVehicles() {
+      const realVehicles = await getVehicles();
+      // Mapiramo podatke iz baze da pašu uz Vehicle interface
+      const mappedVehicles = realVehicles.map((v: any) => ({
+        ...v,
+        currentLocation: v.location || null,  // location → currentLocation
+        lastUser: null,  // za sada null (kasnije računamo iz rezervacija ako hoćeš)
+      }));
+      setDisplayVehicles(mappedVehicles as Vehicle[]);
+    }
+    fetchVehicles();
+  }, []);
 
   return (
     <div className="bg-[#1a1d29] border border-gray-800 rounded-xl p-6">
       <div className="flex items-center justify-between mb-6">
         <h3 className="text-white font-semibold text-lg">Fleet Overview</h3>
-        <span className="text-gray-400 text-sm">{vehicles.length} vehicles</span>
+        <span className="text-gray-400 text-sm">{displayVehicles.length} vehicles</span>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-        {vehicles.map((vehicle) => (
+        {displayVehicles.map((vehicle) => (
           <div
             key={vehicle.id}
             className="bg-[#0f1117] border border-gray-700 rounded-xl p-4 hover:border-blue-500 transition-all cursor-pointer group"

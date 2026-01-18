@@ -1,18 +1,35 @@
 import { MapPin, User, Circle, Search } from 'lucide-react';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { type Vehicle } from '../data/mockData';
 import { useFleet } from '../context/FleetContext';
+import { getVehicles } from '../../lib/queries'; // ako @ ne radi, promeni u '../../lib/queries'
 
 interface VehicleListPageProps {
   vehicles: Vehicle[];
   onSelectVehicle: (vehicle: Vehicle) => void;
 }
 
-export function VehicleListPage({ vehicles, onSelectVehicle }: VehicleListPageProps) {
+export function VehicleListPage({ onSelectVehicle }: VehicleListPageProps) {
   const { reservations } = useFleet();
+  const [displayVehicles, setDisplayVehicles] = useState<Vehicle[]>([]);
   const [sortBy, setSortBy] = useState<'model' | 'plate' | 'status'>('model');
 
-  const sortedVehicles = [...vehicles].sort((a, b) => {
+  useEffect(() => {
+    async function fetchVehicles() {
+      const realVehicles = await getVehicles();
+      // Mapiramo podatke iz baze da pašu uz Vehicle interface iz mockData
+      const mappedVehicles = realVehicles.map((v: any) => ({
+        ...v,
+        currentLocation: v.location || null,  // mapiramo location → currentLocation
+        lastUser: null,  // za sada null (kasnije možemo računati iz rezervacija)
+        // ako ima još razlika u poljima, dodaj ovde
+      }));
+      setDisplayVehicles(mappedVehicles as Vehicle[]);
+    }
+    fetchVehicles();
+  }, []);
+
+  const sortedVehicles = [...displayVehicles].sort((a, b) => {
     if (sortBy === 'model') return a.model.localeCompare(b.model);
     if (sortBy === 'plate') return a.plate.localeCompare(b.plate);
     return a.status.localeCompare(b.status);
@@ -24,7 +41,7 @@ export function VehicleListPage({ vehicles, onSelectVehicle }: VehicleListPagePr
         <div className="flex items-center justify-between mb-6">
           <div>
             <h2 className="text-2xl font-semibold text-white mb-1">Complete Vehicle List</h2>
-            <p className="text-gray-400">Total: {vehicles.length} vehicles</p>
+            <p className="text-gray-400">Total: {displayVehicles.length} vehicles</p>
           </div>
           <div className="flex items-center gap-3">
             <label className="text-gray-400 text-sm">Sort by:</label>
