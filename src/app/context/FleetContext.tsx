@@ -11,6 +11,7 @@ import {
   type Department,
   type Project
 } from '../data/mockData';
+import { loadState, saveState } from '../../lib/storage';
 import { toast } from 'sonner';
 
 interface Activity {
@@ -63,13 +64,20 @@ interface FleetContextType {
 const FleetContext = createContext<FleetContextType | undefined>(undefined);
 
 export function FleetProvider({ children, initialUser }: { children: ReactNode; initialUser?: Employee }) {
-  const [vehicles, setVehicles] = useState<Vehicle[]>(initialVehicles);
-  const [reservations, setReservations] = useState<Reservation[]>(initialReservations);
-  const [employees, setEmployees] = useState<Employee[]>(initialEmployees);
-  const [projects, setProjects] = useState<Project[]>(initialProjects);
-  const [departments, setDepartments] = useState<Department[]>(initialDepartments);
+  const [vehicles, setVehicles] = useState<Vehicle[]>(() => loadState('vehicles', initialVehicles));
+  const [reservations, setReservations] = useState<Reservation[]>(() => loadState('reservations', initialReservations));
+  const [employees, setEmployees] = useState<Employee[]>(() => loadState('employees', initialEmployees));
+  const [projects, setProjects] = useState<Project[]>(() => loadState('projects', initialProjects));
+  const [departments, setDepartments] = useState<Department[]>(() => loadState('departments', initialDepartments));
   const [currentUser, setCurrentUserState] = useState<Employee>(initialUser ?? initialEmployees[0]);
   const [activities, setActivities] = useState<Activity[]>([]);
+
+  // Persist to localStorage on every change
+  useEffect(() => { saveState('vehicles', vehicles); }, [vehicles]);
+  useEffect(() => { saveState('reservations', reservations); }, [reservations]);
+  useEffect(() => { saveState('employees', employees); }, [employees]);
+  useEffect(() => { saveState('projects', projects); }, [projects]);
+  useEffect(() => { saveState('departments', departments); }, [departments]);
 
   // Update vehicle statuses based on current reservations
   useEffect(() => {

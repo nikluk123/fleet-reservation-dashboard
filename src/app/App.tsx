@@ -16,7 +16,8 @@ import { CalendarPage } from './components/CalendarPage';
 import { MyReservationsPage } from './components/MyReservationsPage';
 import { AdminPage } from './components/AdminPage';
 import { LoginPage } from './components/LoginPage';
-import { employees, type Vehicle } from './data/mockData';
+import { employees as defaultEmployees, type Vehicle } from './data/mockData';
+import { loadState } from '../lib/storage';
 
 function AppContent() {
   const {
@@ -236,7 +237,8 @@ export default function App() {
     );
   }
 
-  const loggedEmployee = employees.find(e => e.id === loggedInUserId) ?? employees[0];
+  const employees = loadState('employees', defaultEmployees);
+  const loggedEmployee = employees.find((e: any) => e.id === loggedInUserId) ?? employees[0];
 
   return (
     <FleetProvider initialUser={loggedEmployee}>

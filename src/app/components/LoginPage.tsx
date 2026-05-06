@@ -1,8 +1,9 @@
 import { useState } from 'react';
 import { Car, LogIn, Eye, EyeOff } from 'lucide-react';
-import { employees } from '../data/mockData';
+import { loadState } from '../../lib/storage';
+import { employees as defaultEmployees } from '../data/mockData';
 
-const FLEET_PASSWORD = 'fleet2026';
+const DEFAULT_PASSWORD = 'fleet2026';
 
 interface LoginPageProps {
   onLogin: (employeeId: string) => void;
@@ -21,7 +22,9 @@ export function LoginPage({ onLogin }: LoginPageProps) {
     setLoading(true);
 
     setTimeout(() => {
-      const employee = employees.find(emp => emp.email.toLowerCase() === email.trim().toLowerCase());
+      // Use persisted employee list if available
+      const employees = loadState('employees', defaultEmployees);
+      const employee = employees.find((emp: any) => emp.email.toLowerCase() === email.trim().toLowerCase());
 
       if (!employee) {
         setError('No account found with that email address.');
@@ -29,7 +32,11 @@ export function LoginPage({ onLogin }: LoginPageProps) {
         return;
       }
 
-      if (password !== FLEET_PASSWORD) {
+      // Check stored password, fall back to default
+      const passwords = loadState<Record<string, string>>('passwords', {});
+      const expectedPassword = passwords[employee.id] ?? DEFAULT_PASSWORD;
+
+      if (password !== expectedPassword) {
         setError('Incorrect password. Please try again.');
         setLoading(false);
         return;
