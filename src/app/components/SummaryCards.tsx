@@ -1,89 +1,70 @@
-import { Car, CheckCircle, Calendar, TrendingUp } from 'lucide-react';
+import { Car, CheckCircle, Calendar, Clock } from 'lucide-react';
 import { useFleet } from '../context/FleetContext';
 
 export function SummaryCards() {
-  const { vehicles, reservations, getVehicleStatus } = useFleet();
+  const { vehicles, reservations } = useFleet();
 
-  // Calculate metrics dynamically
+  const now = new Date();
+  const todayStart = new Date(now);
+  todayStart.setHours(0, 0, 0, 0);
+  const todayEnd = new Date(now);
+  todayEnd.setHours(23, 59, 59, 999);
+
   const totalVehicles = vehicles.length;
 
-  // Available Now: vehicles with no approved reservation overlapping current time
-  const now = new Date('2026-01-11T10:00:00'); // Current simulated time
   const availableNow = vehicles.filter(vehicle => {
     if (vehicle.status === 'maintenance') return false;
-    
-    const hasActiveReservation = reservations.some(res => {
-      if (res.vehicleId !== vehicle.id) return false;
-      if (res.status !== 'approved') return false;
-      
-      const start = new Date(res.startDate);
-      const end = new Date(res.endDate);
-      
-      return start <= now && end >= now;
-    });
-    
-    return !hasActiveReservation;
+    return !reservations.some(res =>
+      res.vehicleId === vehicle.id &&
+      res.status === 'approved' &&
+      new Date(res.startDate) <= now &&
+      new Date(res.endDate) >= now
+    );
   }).length;
 
-  // Booked Today: vehicles with at least one approved reservation that includes today
-  const todayStart = new Date('2026-01-11T00:00:00');
-  const todayEnd = new Date('2026-01-11T23:59:59');
-  
-  const bookedToday = vehicles.filter(vehicle => {
-    return reservations.some(res => {
-      if (res.vehicleId !== vehicle.id) return false;
-      if (res.status !== 'approved') return false;
-      
-      const start = new Date(res.startDate);
-      const end = new Date(res.endDate);
-      
-      return start <= todayEnd && end >= todayStart;
-    });
-  }).length;
+  const bookedToday = vehicles.filter(vehicle =>
+    reservations.some(res =>
+      res.vehicleId === vehicle.id &&
+      res.status === 'approved' &&
+      new Date(res.startDate) <= todayEnd &&
+      new Date(res.endDate) >= todayStart
+    )
+  ).length;
 
-  // Upcoming Reservations: total count of approved/pending reservations starting in the future
-  const upcomingReservations = reservations.filter(res => {
-    if (res.status === 'rejected') return false;
-    const start = new Date(res.startDate);
-    return start > now;
-  }).length;
+  const pendingApproval = reservations.filter(res => res.status === 'pending').length;
 
   const cards = [
     {
       title: 'Total Vehicles',
       value: totalVehicles,
       icon: Car,
-      color: 'blue',
       bgColor: 'bg-blue-500/10',
       iconColor: 'text-blue-500',
-      borderColor: 'border-blue-500/50'
+      borderColor: 'border-blue-500/30',
     },
     {
       title: 'Available Now',
       value: availableNow,
       icon: CheckCircle,
-      color: 'green',
       bgColor: 'bg-green-500/10',
       iconColor: 'text-green-500',
-      borderColor: 'border-green-500/50'
+      borderColor: 'border-green-500/30',
     },
     {
       title: 'Booked Today',
       value: bookedToday,
       icon: Calendar,
-      color: 'orange',
       bgColor: 'bg-orange-500/10',
       iconColor: 'text-orange-500',
-      borderColor: 'border-orange-500/50'
+      borderColor: 'border-orange-500/30',
     },
     {
-      title: 'Upcoming Reservations',
-      value: upcomingReservations,
-      icon: TrendingUp,
-      color: 'purple',
+      title: 'Pending Approval',
+      value: pendingApproval,
+      icon: Clock,
       bgColor: 'bg-purple-500/10',
       iconColor: 'text-purple-500',
-      borderColor: 'border-purple-500/50'
+      borderColor: 'border-purple-500/30',
     },
   ];
 
@@ -101,10 +82,8 @@ export function SummaryCards() {
                 <Icon className={`w-6 h-6 ${card.iconColor}`} />
               </div>
             </div>
-            <div>
-              <p className="text-gray-400 text-sm mb-1">{card.title}</p>
-              <p className="text-white text-3xl font-bold">{card.value}</p>
-            </div>
+            <p className="text-gray-400 text-sm mb-1">{card.title}</p>
+            <p className="text-white text-3xl font-bold">{card.value}</p>
           </div>
         );
       })}

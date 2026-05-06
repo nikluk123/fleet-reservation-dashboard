@@ -34,6 +34,25 @@ export interface Reservation {
   approvedAt?: string;
 }
 
+export interface Employee {
+  id: string;
+  name: string;
+  email: string;
+  sector: string;
+  role: 'user' | 'admin';
+}
+
+// Returns date string for current week: offset 0=Mon, 1=Tue, ..., 6=Sun
+function weekDate(dayOffset: number, hour: number = 9): string {
+  const now = new Date();
+  const dow = now.getDay();
+  const mondayDiff = dow === 0 ? -6 : 1 - dow;
+  const target = new Date(now);
+  target.setDate(now.getDate() + mondayDiff + dayOffset);
+  target.setHours(hour, 0, 0, 0);
+  return target.toISOString().slice(0, 16);
+}
+
 export const departments: Department[] = [
   { id: 'management', name: 'Management' },
   { id: 'development', name: 'Development' },
@@ -88,12 +107,12 @@ export const reservations: Reservation[] = [
     bookerName: 'Maria Silva',
     sector: 'Engineering - Design',
     project: 'Northern Highway Project',
-    startDate: '2026-01-11T09:00',
-    endDate: '2026-01-13T17:00',
+    startDate: weekDate(0, 9),
+    endDate: weekDate(2, 17),
     notes: 'Site inspection',
     status: 'approved',
     approvedBy: 'John Smith',
-    approvedAt: '2026-01-10T14:30'
+    approvedAt: weekDate(0, 8),
   },
   {
     id: '2',
@@ -101,12 +120,12 @@ export const reservations: Reservation[] = [
     bookerName: 'Carlos Santos',
     sector: 'Engineering - Construction',
     project: 'Bridge Renovation',
-    startDate: '2026-01-10T08:00',
-    endDate: '2026-01-14T18:00',
+    startDate: weekDate(0, 8),
+    endDate: weekDate(4, 18),
     notes: 'Construction site visits',
     status: 'approved',
     approvedBy: 'John Smith',
-    approvedAt: '2026-01-09T16:00'
+    approvedAt: weekDate(0, 7),
   },
   {
     id: '3',
@@ -114,12 +133,12 @@ export const reservations: Reservation[] = [
     bookerName: 'Ana Costa',
     sector: 'Asset Management & Logistics - AM',
     project: 'Asset Survey Q1',
-    startDate: '2026-01-11T10:00',
-    endDate: '2026-01-12T16:00',
+    startDate: weekDate(1, 10),
+    endDate: weekDate(2, 16),
     notes: 'Equipment inspection',
     status: 'approved',
     approvedBy: 'John Smith',
-    approvedAt: '2026-01-10T09:15'
+    approvedAt: weekDate(1, 9),
   },
   {
     id: '4',
@@ -127,12 +146,12 @@ export const reservations: Reservation[] = [
     bookerName: 'Pedro Alves',
     sector: 'Development',
     project: 'New Site Development',
-    startDate: '2026-01-09T08:00',
-    endDate: '2026-01-15T17:00',
+    startDate: weekDate(0, 8),
+    endDate: weekDate(6, 17),
     notes: 'Week-long site evaluation',
     status: 'approved',
     approvedBy: 'John Smith',
-    approvedAt: '2026-01-08T11:00'
+    approvedAt: weekDate(0, 7),
   },
   {
     id: '5',
@@ -140,12 +159,12 @@ export const reservations: Reservation[] = [
     bookerName: 'Sofia Lima',
     sector: 'Asset Management & Logistics - Logistics',
     project: 'Equipment Transport',
-    startDate: '2026-01-11T07:00',
-    endDate: '2026-01-11T19:00',
+    startDate: weekDate(2, 7),
+    endDate: weekDate(2, 19),
     notes: 'Transporting materials',
     status: 'approved',
     approvedBy: 'John Smith',
-    approvedAt: '2026-01-10T08:00'
+    approvedAt: weekDate(2, 6),
   },
   {
     id: '6',
@@ -153,9 +172,9 @@ export const reservations: Reservation[] = [
     bookerName: 'Ricardo Mendes',
     sector: 'Engineering - Permitting',
     project: 'Permit Site Visit',
-    startDate: '2026-01-14T09:00',
-    endDate: '2026-01-14T15:00',
-    status: 'pending'
+    startDate: weekDate(4, 9),
+    endDate: weekDate(4, 15),
+    status: 'pending',
   },
   {
     id: '7',
@@ -163,19 +182,11 @@ export const reservations: Reservation[] = [
     bookerName: 'Luisa Torres',
     sector: 'Management',
     project: 'Executive Review',
-    startDate: '2026-01-16T10:00',
-    endDate: '2026-01-17T14:00',
-    status: 'pending'
+    startDate: weekDate(7, 10),
+    endDate: weekDate(8, 14),
+    status: 'pending',
   },
 ];
-
-export interface Employee {
-  id: string;
-  name: string;
-  email: string;
-  sector: string;
-  role: 'user' | 'admin';
-}
 
 export const employees: Employee[] = [
   { id: '1', name: 'John Smith', email: 'john.smith@fleetflow.com', sector: 'Management', role: 'admin' },
@@ -188,4 +199,4 @@ export const employees: Employee[] = [
   { id: '8', name: 'Luisa Torres', email: 'luisa.torres@fleetflow.com', sector: 'Management', role: 'user' },
 ];
 
-export const currentUser: Employee = employees[0]; // John Smith (admin)
+export const currentUser: Employee = employees[0];

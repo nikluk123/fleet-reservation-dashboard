@@ -1,4 +1,4 @@
-import { LayoutDashboard, Car, Calendar, ClipboardList, Settings, Shield } from 'lucide-react';
+import { LayoutDashboard, Calendar, ClipboardList, Settings, Shield, LogOut } from 'lucide-react';
 import { useFleet } from '../context/FleetContext';
 
 interface SidebarProps {
@@ -8,16 +8,17 @@ interface SidebarProps {
   isAdmin?: boolean;
 }
 
-const menuItems = [
-  { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
-  { id: 'vehicles', label: 'Vehicle List', icon: Car },
-  { id: 'calendar', label: 'Reservations Calendar', icon: Calendar },
-  { id: 'my-reservations', label: 'My Reservations', icon: ClipboardList },
-  { id: 'admin', label: 'Admin', icon: Shield, adminOnly: true },
+const allMenuItems = [
+  { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard, adminOnly: false },
+  { id: 'calendar', label: 'Reservations Calendar', icon: Calendar, adminOnly: true },
+  { id: 'my-reservations', label: 'My Reservations', icon: ClipboardList, adminOnly: false },
+  { id: 'admin', label: 'Admin Panel', icon: Shield, adminOnly: true },
 ];
 
-export function Sidebar({ activeView, setActiveView, onSettingsClick, isAdmin = true }: SidebarProps) {
-  const { currentUser } = useFleet();
+export function Sidebar({ activeView, setActiveView, onSettingsClick, isAdmin = false }: SidebarProps) {
+  const { currentUser, logout } = useFleet();
+
+  const menuItems = allMenuItems.filter(item => !item.adminOnly || isAdmin);
 
   return (
     <aside className="w-64 bg-[#1a1d29] border-r border-gray-800 flex flex-col">
@@ -25,7 +26,7 @@ export function Sidebar({ activeView, setActiveView, onSettingsClick, isAdmin = 
       <div className="p-6 border-b border-gray-800">
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-blue-700 rounded-lg flex items-center justify-center">
-            <Car className="w-6 h-6 text-white" />
+            <Shield className="w-6 h-6 text-white" />
           </div>
           <div>
             <h1 className="text-white font-semibold text-lg">FleetFlow</h1>
@@ -44,19 +45,16 @@ export function Sidebar({ activeView, setActiveView, onSettingsClick, isAdmin = 
           </div>
           <div className="flex-1 min-w-0">
             <p className="text-white text-sm font-medium truncate">{currentUser.name}</p>
-            <p className="text-gray-400 text-xs capitalize truncate">{currentUser.role}</p>
+            <p className="text-gray-400 text-xs capitalize">{currentUser.role === 'admin' ? 'Administrator' : 'User'}</p>
           </div>
         </div>
       </div>
-      
+
       <nav className="flex-1 p-4">
-        <ul className="space-y-2">
+        <ul className="space-y-1">
           {menuItems.map((item) => {
             const Icon = item.icon;
             const isActive = activeView === item.id;
-            if (item.adminOnly && !isAdmin) {
-              return null;
-            }
             return (
               <li key={item.id}>
                 <button
@@ -75,14 +73,21 @@ export function Sidebar({ activeView, setActiveView, onSettingsClick, isAdmin = 
           })}
         </ul>
       </nav>
-      
-      <div className="p-4 border-t border-gray-800">
+
+      <div className="p-4 border-t border-gray-800 space-y-1">
         <button
           onClick={onSettingsClick}
           className="w-full flex items-center gap-3 px-4 py-3 rounded-lg text-gray-400 hover:bg-gray-800/50 hover:text-white transition-all"
         >
           <Settings className="w-5 h-5" />
           <span className="font-medium">Settings</span>
+        </button>
+        <button
+          onClick={logout}
+          className="w-full flex items-center gap-3 px-4 py-3 rounded-lg text-gray-400 hover:bg-red-500/10 hover:text-red-400 transition-all"
+        >
+          <LogOut className="w-5 h-5" />
+          <span className="font-medium">Sign Out</span>
         </button>
       </div>
     </aside>
