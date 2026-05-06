@@ -12,6 +12,7 @@ import {
   type Project
 } from '../data/mockData';
 import { loadState, saveState } from '../../lib/storage';
+import { notifyAdminsNewRequest, notifyUserStatusChange } from '../../lib/emailService';
 import { toast } from 'sonner';
 
 interface Activity {
@@ -148,6 +149,12 @@ export function FleetProvider({ children, initialUser }: { children: ReactNode; 
     const vehicle = vehicles.find(v => v.id === reservation.vehicleId);
     addActivity('reservation_created', `New reservation for ${vehicle?.plate} by ${reservation.bookerName}`, currentUser.name);
     toast.success('Reservation submitted for approval');
+
+    // Email: notify all admins
+    if (vehicle) {
+      const admins = employees.filter(e => e.role === 'admin');
+      notifyAdminsNewRequest(reservation, vehicle, admins);
+    }
   };
 
   const updateReservation = (id: string, reservation: Partial<Reservation>) => {
@@ -172,6 +179,13 @@ export function FleetProvider({ children, initialUser }: { children: ReactNode; 
 
     if (reservation && vehicle) {
       addActivity('reservation_approved', `Reservation for ${vehicle.plate} approved for ${reservation.bookerName}`, currentUser.name);
+
+      // Email: notify the booker
+      const booker = employees.find(e => e.name === reservation.bookerName);
+      if (booker) {
+        const approved: Reservation = { ...reservation, status: 'approved', approvedBy: currentUser.name };
+        notifyUserStatusChange(approved, vehicle, 'approved', currentUser.name, booker.email);
+      }
     }
     toast.success('Reservation approved');
   };
@@ -184,6 +198,13 @@ export function FleetProvider({ children, initialUser }: { children: ReactNode; 
 
     if (reservation && vehicle) {
       addActivity('reservation_rejected', `Reservation for ${vehicle.plate} rejected for ${reservation.bookerName}`, currentUser.name);
+
+      // Email: notify the booker
+      const booker = employees.find(e => e.name === reservation.bookerName);
+      if (booker) {
+        const rejected: Reservation = { ...reservation, status: 'rejected' };
+        notifyUserStatusChange(rejected, vehicle, 'rejected', currentUser.name, booker.email);
+      }
     }
     toast.error('Reservation rejected');
   };
