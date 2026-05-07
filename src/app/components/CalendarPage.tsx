@@ -29,18 +29,19 @@ export function CalendarPage({ reservations }: CalendarPageProps) {
     if (!day) return [];
     const dateCheck = new Date(viewDate.getFullYear(), viewDate.getMonth(), day, 12);
     return reservations.filter(res => {
+      if (res.status === 'rejected') return false;
       const start = new Date(res.startDate);
       const end = new Date(res.endDate);
       start.setHours(0, 0, 0, 0);
       end.setHours(23, 59, 59, 999);
-      return dateCheck >= start && dateCheck <= end && res.status === 'approved';
+      return dateCheck >= start && dateCheck <= end;
     });
   };
 
   const upcomingReservations = reservations
     .filter(res => {
       const start = new Date(res.startDate);
-      return start >= now && res.status === 'approved';
+      return start >= now && res.status !== 'rejected';
     })
     .sort((a, b) => new Date(a.startDate).getTime() - new Date(b.startDate).getTime())
     .slice(0, 8);
@@ -105,13 +106,18 @@ export function CalendarPage({ reservations }: CalendarPageProps) {
                     <div className="space-y-1">
                       {dayRes.slice(0, 3).map((res) => {
                         const vehicle = vehicles.find(v => v.id === res.vehicleId);
+                        const isPending = res.status === 'pending';
                         return (
                           <div
                             key={res.id}
-                            className="bg-blue-600/20 border border-blue-600/40 rounded px-2 py-0.5 text-xs text-blue-400 truncate"
-                            title={`${vehicle?.plate} – ${res.bookerName}`}
+                            className={`rounded px-2 py-0.5 text-xs truncate border ${
+                              isPending
+                                ? 'bg-orange-500/20 border-orange-500/40 text-orange-400'
+                                : 'bg-blue-600/20 border-blue-600/40 text-blue-400'
+                            }`}
+                            title={`${vehicle?.plate} – ${res.bookerName} (${res.status})`}
                           >
-                            {vehicle?.plate}
+                            {vehicle?.plate}{isPending ? ' ?' : ''}
                           </div>
                         );
                       })}

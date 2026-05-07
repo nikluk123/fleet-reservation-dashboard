@@ -66,16 +66,22 @@ const FleetContext = createContext<FleetContextType | undefined>(undefined);
 
 export function FleetProvider({ children, initialUser }: { children: ReactNode; initialUser?: Employee }) {
   const [vehicles, setVehicles] = useState<Vehicle[]>(() => loadState('vehicles', initialVehicles));
-  const [reservations, setReservations] = useState<Reservation[]>(() => loadState('reservations', initialReservations));
+  const [reservations, setReservations] = useState<Reservation[]>(() => {
+    // Mock reservations (id 1-7) have date-relative values that go stale.
+    // Only persist user-created reservations (id > 7) and merge with fresh mock data.
+    const stored = loadState<Reservation[]>('reservations', []);
+    const userCreated = stored.filter(r => parseInt(r.id) > 7);
+    return [...initialReservations, ...userCreated];
+  });
   const [employees, setEmployees] = useState<Employee[]>(() => loadState('employees', initialEmployees));
   const [projects, setProjects] = useState<Project[]>(() => loadState('projects', initialProjects));
   const [departments, setDepartments] = useState<Department[]>(() => loadState('departments', initialDepartments));
   const [currentUser, setCurrentUserState] = useState<Employee>(initialUser ?? initialEmployees[0]);
   const [activities, setActivities] = useState<Activity[]>([]);
 
-  // Persist to localStorage on every change
+  // Persist to localStorage — for reservations, only save user-created ones (id > 7)
   useEffect(() => { saveState('vehicles', vehicles); }, [vehicles]);
-  useEffect(() => { saveState('reservations', reservations); }, [reservations]);
+  useEffect(() => { saveState('reservations', reservations.filter(r => parseInt(r.id) > 7)); }, [reservations]);
   useEffect(() => { saveState('employees', employees); }, [employees]);
   useEffect(() => { saveState('projects', projects); }, [projects]);
   useEffect(() => { saveState('departments', departments); }, [departments]);
