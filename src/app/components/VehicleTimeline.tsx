@@ -128,7 +128,7 @@ export function VehicleTimeline({ vehicles, reservations }: VehicleTimelineProps
                       </div>
 
                       {reservation && isHovered && (
-                        <div className="absolute z-20 top-full mt-2 left-1/2 -translate-x-1/2 bg-gray-900 border border-gray-700 rounded-lg p-3 shadow-xl min-w-[210px] pointer-events-none">
+                        <div className={`absolute z-20 top-full mt-2 bg-gray-900 border border-gray-700 rounded-lg p-3 shadow-xl min-w-[210px] pointer-events-none ${idx >= 4 ? 'right-0' : 'left-1/2 -translate-x-1/2'}`}>
                           <div className="text-white text-sm font-medium mb-0.5">{reservation.bookerName}</div>
                           <div className="text-gray-400 text-xs mb-0.5">{reservation.sector}</div>
                           {reservation.project && (

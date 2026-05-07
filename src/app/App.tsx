@@ -154,7 +154,7 @@ function AppContent() {
               filtersApplied={filtersApplied}
             />
 
-            <VehicleTimeline vehicles={vehicles} reservations={reservations} />
+            <VehicleTimeline vehicles={filteredVehicles} reservations={reservations} />
 
             {currentUser.role === 'admin' && pendingReservations.length > 0 && (
               <ApprovalWorkflow
