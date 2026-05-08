@@ -25,7 +25,21 @@ export function LoginPage({ onLogin }: LoginPageProps) {
         .ilike('email', email.trim())
         .single();
 
-      if (dbError || !data) {
+      if (dbError) {
+        console.error('Login error:', dbError);
+        // 42P01 = table doesn't exist, 42703 = column doesn't exist
+        if (dbError.code === '42P01' || dbError.code === '42703') {
+          setError('Database not set up yet. Please run the SQL setup script in Supabase first.');
+        } else if (dbError.code === 'PGRST116') {
+          setError('No account found with that email address.');
+        } else {
+          setError(`Database error: ${dbError.message}`);
+        }
+        setLoading(false);
+        return;
+      }
+
+      if (!data) {
         setError('No account found with that email address.');
         setLoading(false);
         return;
@@ -38,7 +52,8 @@ export function LoginPage({ onLogin }: LoginPageProps) {
       }
 
       onLogin(data.id);
-    } catch {
+    } catch (err: any) {
+      console.error('Login exception:', err);
       setError('Connection error. Check your internet and try again.');
       setLoading(false);
     }
