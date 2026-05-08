@@ -22,16 +22,13 @@ export function LoginPage({ onLogin }: LoginPageProps) {
       const { data, error: dbError } = await supabase
         .from('employees')
         .select('id, password')
-        .ilike('email', email.trim())
-        .single();
+        .eq('email', email.trim().toLowerCase())
+        .maybeSingle();
 
       if (dbError) {
         console.error('Login error:', dbError);
-        // 42P01 = table doesn't exist, 42703 = column doesn't exist
         if (dbError.code === '42P01' || dbError.code === '42703') {
           setError('Database not set up yet. Please run the SQL setup script in Supabase first.');
-        } else if (dbError.code === 'PGRST116') {
-          setError('No account found with that email address.');
         } else {
           setError(`Database error: ${dbError.message}`);
         }
