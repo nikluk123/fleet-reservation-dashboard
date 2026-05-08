@@ -1,7 +1,6 @@
 import { X, User, Lock, Eye, EyeOff, CheckCircle } from 'lucide-react';
 import { useState } from 'react';
 import { useFleet } from '../context/FleetContext';
-import { getPassword, setPassword } from '../../lib/storage';
 
 interface SettingsModalProps {
   isOpen: boolean;
@@ -9,7 +8,7 @@ interface SettingsModalProps {
 }
 
 export function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
-  const { currentUser } = useFleet();
+  const { currentUser, changePassword } = useFleet();
 
   const [currentPassword, setCurrentPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
@@ -18,17 +17,13 @@ export function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
   const [showNew, setShowNew] = useState(false);
   const [passwordError, setPasswordError] = useState('');
   const [passwordSuccess, setPasswordSuccess] = useState(false);
+  const [saving, setSaving] = useState(false);
 
-  const handleChangePassword = (e: React.FormEvent) => {
+  const handleChangePassword = async (e: React.FormEvent) => {
     e.preventDefault();
     setPasswordError('');
     setPasswordSuccess(false);
 
-    const stored = getPassword(currentUser.id);
-    if (currentPassword !== stored) {
-      setPasswordError('Current password is incorrect.');
-      return;
-    }
     if (newPassword.length < 6) {
       setPasswordError('New password must be at least 6 characters.');
       return;
@@ -38,7 +33,15 @@ export function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
       return;
     }
 
-    setPassword(currentUser.id, newPassword);
+    setSaving(true);
+    const result = await changePassword(currentPassword, newPassword);
+    setSaving(false);
+
+    if (result === 'wrong-password') {
+      setPasswordError('Current password is incorrect.');
+      return;
+    }
+
     setPasswordSuccess(true);
     setCurrentPassword('');
     setNewPassword('');
@@ -50,7 +53,6 @@ export function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
   return (
     <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
       <div className="bg-[#1a1d29] border border-gray-800 rounded-2xl max-w-lg w-full max-h-[90vh] overflow-y-auto">
-        {/* Header */}
         <div className="flex items-center justify-between p-6 border-b border-gray-800">
           <h2 className="text-xl font-semibold text-white">Settings</h2>
           <button onClick={onClose} className="p-2 rounded-lg hover:bg-gray-800 transition-colors">
@@ -123,9 +125,10 @@ export function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
 
               <button
                 type="submit"
-                className="w-full py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-colors"
+                disabled={saving}
+                className="w-full py-2.5 bg-blue-600 hover:bg-blue-700 disabled:opacity-60 text-white rounded-lg font-medium transition-colors flex items-center justify-center gap-2"
               >
-                Update Password
+                {saving ? <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" /> : 'Update Password'}
               </button>
             </form>
           </div>

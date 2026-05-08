@@ -1,9 +1,6 @@
 import { useState } from 'react';
 import { Car, LogIn, Eye, EyeOff } from 'lucide-react';
-import { loadState } from '../../lib/storage';
-import { employees as defaultEmployees } from '../data/mockData';
-
-const DEFAULT_PASSWORD = 'fleet2026';
+import { supabase } from '../../lib/supabaseClient';
 
 interface LoginPageProps {
   onLogin: (employeeId: string) => void;
@@ -16,41 +13,40 @@ export function LoginPage({ onLogin }: LoginPageProps) {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
     setLoading(true);
 
-    setTimeout(() => {
-      // Use persisted employee list if available
-      const employees = loadState('employees', defaultEmployees);
-      const employee = employees.find((emp: any) => emp.email.toLowerCase() === email.trim().toLowerCase());
+    try {
+      const { data, error: dbError } = await supabase
+        .from('employees')
+        .select('id, password')
+        .ilike('email', email.trim())
+        .single();
 
-      if (!employee) {
+      if (dbError || !data) {
         setError('No account found with that email address.');
         setLoading(false);
         return;
       }
 
-      // Check stored password, fall back to default
-      const passwords = loadState<Record<string, string>>('passwords', {});
-      const expectedPassword = passwords[employee.id] ?? DEFAULT_PASSWORD;
-
-      if (password !== expectedPassword) {
+      if (password !== data.password) {
         setError('Incorrect password. Please try again.');
         setLoading(false);
         return;
       }
 
-      onLogin(employee.id);
+      onLogin(data.id);
+    } catch {
+      setError('Connection error. Check your internet and try again.');
       setLoading(false);
-    }, 400);
+    }
   };
 
   return (
     <div className="min-h-screen bg-[#0f1117] flex items-center justify-center p-4">
       <div className="w-full max-w-md">
-        {/* Logo */}
         <div className="flex flex-col items-center mb-10">
           <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-blue-700 rounded-2xl flex items-center justify-center shadow-lg shadow-blue-500/30 mb-4">
             <Car className="w-9 h-9 text-white" />
@@ -59,35 +55,30 @@ export function LoginPage({ onLogin }: LoginPageProps) {
           <p className="text-gray-400 text-sm mt-1">Fleet Management System</p>
         </div>
 
-        {/* Card */}
         <div className="bg-[#1a1d29] border border-gray-800 rounded-2xl p-8 shadow-2xl">
           <h2 className="text-white text-xl font-semibold mb-1">Sign in to your account</h2>
           <p className="text-gray-400 text-sm mb-6">Enter your company email and password</p>
 
           <form onSubmit={handleSubmit} className="space-y-5">
             <div>
-              <label className="block text-gray-400 text-sm font-medium mb-2">
-                Email address
-              </label>
+              <label className="block text-gray-400 text-sm font-medium mb-2">Email address</label>
               <input
                 type="email"
                 value={email}
-                onChange={(e) => { setEmail(e.target.value); setError(''); }}
-                placeholder="you@fleetflow.com"
+                onChange={e => { setEmail(e.target.value); setError(''); }}
+                placeholder="you@company.com"
                 required
                 className="w-full bg-[#0f1117] border border-gray-700 rounded-lg px-4 py-3 text-white placeholder-gray-600 focus:outline-none focus:border-blue-500 transition-colors"
               />
             </div>
 
             <div>
-              <label className="block text-gray-400 text-sm font-medium mb-2">
-                Password
-              </label>
+              <label className="block text-gray-400 text-sm font-medium mb-2">Password</label>
               <div className="relative">
                 <input
                   type={showPassword ? 'text' : 'password'}
                   value={password}
-                  onChange={(e) => { setPassword(e.target.value); setError(''); }}
+                  onChange={e => { setPassword(e.target.value); setError(''); }}
                   placeholder="••••••••"
                   required
                   className="w-full bg-[#0f1117] border border-gray-700 rounded-lg px-4 py-3 text-white placeholder-gray-600 focus:outline-none focus:border-blue-500 transition-colors pr-12"
@@ -126,7 +117,7 @@ export function LoginPage({ onLogin }: LoginPageProps) {
         </div>
 
         <p className="text-center text-gray-600 text-sm mt-6">
-          Company internal system — contact IT for access issues
+          Company internal system — contact admin for access issues
         </p>
       </div>
     </div>

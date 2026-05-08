@@ -16,8 +16,8 @@ import { CalendarPage } from './components/CalendarPage';
 import { MyReservationsPage } from './components/MyReservationsPage';
 import { AdminPage } from './components/AdminPage';
 import { LoginPage } from './components/LoginPage';
-import { employees as defaultEmployees, type Vehicle } from './data/mockData';
-import { loadState } from '../lib/storage';
+import { type Vehicle, type Employee } from './data/mockData';
+import { supabase } from '../lib/supabaseClient';
 
 function AppContent() {
   const {
@@ -49,7 +49,7 @@ function AppContent() {
   const [dateRange, setDateRange] = useState({ start: todayStr, end: nextWeek.toISOString().split('T')[0] });
   const [filtersApplied, setFiltersApplied] = useState(false);
 
-  // Redirect users away from admin/calendar if they don't have access
+  // Redirect non-admins away from admin/calendar views
   useEffect(() => {
     if (currentUser.role !== 'admin' && (activeView === 'admin' || activeView === 'calendar')) {
       setActiveView('dashboard');
@@ -222,13 +222,53 @@ export default function App() {
   const [loggedInUserId, setLoggedInUserId] = useState<string | null>(() => {
     return localStorage.getItem('fleetflow_user_id');
   });
+  const [loggedEmployee, setLoggedEmployee] = useState<Employee | null>(null);
+  const [loadingUser, setLoadingUser] = useState(!!localStorage.getItem('fleetflow_user_id'));
+
+  useEffect(() => {
+    if (!loggedInUserId) {
+      setLoggedEmployee(null);
+      setLoadingUser(false);
+      return;
+    }
+
+    setLoadingUser(true);
+    supabase
+      .from('employees')
+      .select('id, name, email, sector, role')
+      .eq('id', loggedInUserId)
+      .single()
+      .then(({ data, error }) => {
+        if (error || !data) {
+          localStorage.removeItem('fleetflow_user_id');
+          setLoggedInUserId(null);
+        } else {
+          setLoggedEmployee({
+            id: data.id,
+            name: data.name,
+            email: data.email,
+            sector: data.sector,
+            role: data.role as 'admin' | 'user',
+          });
+        }
+        setLoadingUser(false);
+      });
+  }, [loggedInUserId]);
 
   const handleLogin = (employeeId: string) => {
     localStorage.setItem('fleetflow_user_id', employeeId);
     setLoggedInUserId(employeeId);
   };
 
-  if (!loggedInUserId) {
+  if (loadingUser) {
+    return (
+      <div className="min-h-screen bg-[#0f1117] flex items-center justify-center">
+        <div className="w-10 h-10 border-2 border-blue-500/30 border-t-blue-500 rounded-full animate-spin" />
+      </div>
+    );
+  }
+
+  if (!loggedInUserId || !loggedEmployee) {
     return (
       <>
         <Toaster position="top-right" richColors />
@@ -236,9 +276,6 @@ export default function App() {
       </>
     );
   }
-
-  const employees = loadState('employees', defaultEmployees);
-  const loggedEmployee = employees.find((e: any) => e.id === loggedInUserId) ?? employees[0];
 
   return (
     <FleetProvider initialUser={loggedEmployee}>
