@@ -141,43 +141,50 @@ export function ReservationModal({ isOpen, onClose, onSubmit, preselectedVehicle
           {/* Employee Selector */}
           <div className="relative">
             <label className="block text-gray-400 text-sm mb-2">Employee *</label>
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-              <input
-                type="text"
-                value={employeeSearch}
-                onChange={(e) => {
-                  setEmployeeSearch(e.target.value);
-                  setShowEmployeeDropdown(true);
-                }}
-                onFocus={() => setShowEmployeeDropdown(true)}
-                placeholder="Search employees..."
-                className="w-full bg-[#0f1117] border border-gray-700 rounded-lg pl-10 pr-4 py-2.5 text-white focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"
-                required
-              />
-            </div>
-            
-            {showEmployeeDropdown && filteredEmployees.length > 0 && (
+            {currentUser.role === 'admin' ? (
               <>
-                <div 
-                  className="fixed inset-0 z-10" 
-                  onClick={() => setShowEmployeeDropdown(false)}
-                />
-                <div className="absolute z-20 w-full mt-1 bg-[#1a1d29] border border-gray-700 rounded-lg shadow-xl max-h-60 overflow-y-auto">
-                  {filteredEmployees.map((employee) => (
-                    <button
-                      key={employee.id}
-                      type="button"
-                      onClick={() => handleEmployeeSelect(employee)}
-                      className="w-full text-left px-4 py-3 hover:bg-gray-800 transition-colors border-b border-gray-800 last:border-b-0"
-                    >
-                      <div className="text-white font-medium">{employee.name}</div>
-                      <div className="text-gray-400 text-sm">{employee.email}</div>
-                      <div className="text-gray-500 text-xs mt-1">{employee.sector}</div>
-                    </button>
-                  ))}
+                <div className="relative">
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                  <input
+                    type="text"
+                    value={employeeSearch}
+                    onChange={(e) => {
+                      setEmployeeSearch(e.target.value);
+                      setShowEmployeeDropdown(true);
+                    }}
+                    onFocus={() => setShowEmployeeDropdown(true)}
+                    placeholder="Search employees..."
+                    className="w-full bg-[#0f1117] border border-gray-700 rounded-lg pl-10 pr-4 py-2.5 text-white focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"
+                    required
+                  />
                 </div>
+                {showEmployeeDropdown && filteredEmployees.length > 0 && (
+                  <>
+                    <div
+                      className="fixed inset-0 z-10"
+                      onClick={() => setShowEmployeeDropdown(false)}
+                    />
+                    <div className="absolute z-20 w-full mt-1 bg-[#1a1d29] border border-gray-700 rounded-lg shadow-xl max-h-60 overflow-y-auto">
+                      {filteredEmployees.map((employee) => (
+                        <button
+                          key={employee.id}
+                          type="button"
+                          onClick={() => handleEmployeeSelect(employee)}
+                          className="w-full text-left px-4 py-3 hover:bg-gray-800 transition-colors border-b border-gray-800 last:border-b-0"
+                        >
+                          <div className="text-white font-medium">{employee.name}</div>
+                          <div className="text-gray-400 text-sm">{employee.email}</div>
+                          <div className="text-gray-500 text-xs mt-1">{employee.sector}</div>
+                        </button>
+                      ))}
+                    </div>
+                  </>
+                )}
               </>
+            ) : (
+              <div className="w-full bg-gray-800/50 border border-gray-700 rounded-lg px-4 py-2.5 text-gray-400 cursor-not-allowed">
+                {currentUser.name}
+              </div>
             )}
           </div>
 

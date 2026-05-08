@@ -10,7 +10,7 @@ export function AdminPage() {
     addEmployee, updateEmployee, deleteEmployee,
     addProject, updateProject, deleteProject,
     addDepartment, deleteDepartment,
-    approveReservation, rejectReservation,
+    approveReservation, rejectReservation, deleteReservation,
   } = useFleet();
 
   const [activeTab, setActiveTab] = useState<'vehicles' | 'employees' | 'projects' | 'sectors' | 'reservations'>('vehicles');
@@ -58,7 +58,7 @@ export function AdminPage() {
             <SectorsTab sectors={departments} addDepartment={addDepartment} deleteDepartment={deleteDepartment} />
           )}
           {activeTab === 'reservations' && (
-            <ReservationsTab reservations={reservations} vehicles={vehicles} employees={employees} onApprove={approveReservation} onReject={rejectReservation} />
+            <ReservationsTab reservations={reservations} vehicles={vehicles} employees={employees} onApprove={approveReservation} onReject={rejectReservation} onDelete={deleteReservation} />
           )}
         </div>
       </div>
@@ -390,7 +390,7 @@ function SectorsTab({ sectors, addDepartment, deleteDepartment }: any) {
 
 // ── All Reservations ──────────────────────────────────────────────────────────
 
-function ReservationsTab({ reservations, vehicles, onApprove, onReject }: any) {
+function ReservationsTab({ reservations, vehicles, onApprove, onReject, onDelete }: any) {
   const [filter, setFilter] = useState<'all' | 'pending' | 'approved' | 'rejected'>('all');
 
   const filtered = reservations.filter((r: any) => filter === 'all' || r.status === filter);
@@ -434,15 +434,18 @@ function ReservationsTab({ reservations, vehicles, onApprove, onReject }: any) {
                   </p>
                 </div>
               </div>
-              {res.status === 'pending' && (
-                <div className="flex gap-2 flex-shrink-0">
-                  <button onClick={() => onApprove(res.id)} className="px-3 py-1.5 bg-green-600/20 border border-green-600/50 text-green-400 rounded-lg text-sm hover:bg-green-600/30 transition-colors">Approve</button>
-                  <button onClick={() => onReject(res.id)} className="px-3 py-1.5 bg-red-600/20 border border-red-600/50 text-red-400 rounded-lg text-sm hover:bg-red-600/30 transition-colors">Reject</button>
-                </div>
-              )}
-              {res.status === 'approved' && res.approvedBy && (
-                <p className="text-gray-500 text-xs flex-shrink-0">Approved by {res.approvedBy}</p>
-              )}
+              <div className="flex items-center gap-2 flex-shrink-0">
+                {res.status === 'pending' && (
+                  <>
+                    <button onClick={() => onApprove(res.id)} className="px-3 py-1.5 bg-green-600/20 border border-green-600/50 text-green-400 rounded-lg text-sm hover:bg-green-600/30 transition-colors">Approve</button>
+                    <button onClick={() => onReject(res.id)} className="px-3 py-1.5 bg-red-600/20 border border-red-600/50 text-red-400 rounded-lg text-sm hover:bg-red-600/30 transition-colors">Reject</button>
+                  </>
+                )}
+                {res.status === 'approved' && res.approvedBy && (
+                  <p className="text-gray-500 text-xs">Approved by {res.approvedBy}</p>
+                )}
+                <IconBtn icon={Trash2} color="red" onClick={() => confirm('Delete this reservation?') && onDelete(res.id)} />
+              </div>
             </div>
           );
         })}
