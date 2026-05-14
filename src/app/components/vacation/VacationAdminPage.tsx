@@ -48,7 +48,7 @@ export function VacationAdminPage() {
 // ── Employees Tab ──────────────────────────────────────────────────────────────
 
 function EmployeesTab() {
-  const { employees, updateEmployeeVacation, getUsedDays } = useVacation();
+  const { employees, updateEmployeeVacation, deleteEmployee, getUsedDays } = useVacation();
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editData, setEditData] = useState<{ vacationDaysTotal: number; vacationRole: string }>({ vacationDaysTotal: 20, vacationRole: 'user' });
 
@@ -144,8 +144,9 @@ function EmployeesTab() {
                         </span>
                       </td>
                       <td className="py-3 px-4">
-                        <div className="flex justify-end">
+                        <div className="flex gap-1 justify-end">
                           <IconBtn icon={Edit} color="blue" onClick={() => startEdit(emp)} />
+                          <IconBtn icon={Trash2} color="red" onClick={() => confirm('Delete this employee?') && deleteEmployee(emp.id)} />
                         </div>
                       </td>
                     </>

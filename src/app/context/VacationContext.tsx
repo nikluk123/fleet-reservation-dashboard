@@ -17,6 +17,8 @@ interface VacationContextType {
   cancelRequest: (id: string) => Promise<void>;
 
   updateEmployeeVacation: (id: string, data: { vacationDaysTotal?: number; vacationRole?: string }) => Promise<void>;
+  deleteEmployee: (id: string) => Promise<void>;
+  changePassword: (currentPwd: string, newPwd: string) => Promise<'ok' | 'wrong-password'>;
 
   getUsedDays: (employeeId: string) => number;
   getRemainingDays: (employeeId: string) => number;
@@ -212,6 +214,29 @@ export function VacationProvider({ initialUser, onLogout, children }: Props) {
     }
   };
 
+  const deleteEmployee = async (id: string) => {
+    const prev = employees.find(e => e.id === id);
+    setEmployees(p => p.filter(e => e.id !== id));
+    const { error } = await supabase.from('employees').delete().eq('id', id);
+    if (error) {
+      if (prev) setEmployees(p => [...p, prev]);
+      toast.error('Failed to delete employee');
+    } else {
+      toast.success('Employee deleted');
+    }
+  };
+
+  const changePassword = async (currentPwd: string, newPwd: string): Promise<'ok' | 'wrong-password'> => {
+    const { data } = await supabase
+      .from('employees')
+      .select('password')
+      .eq('id', currentUser.id)
+      .single();
+    if (!data || data.password !== currentPwd) return 'wrong-password';
+    await supabase.from('employees').update({ password: newPwd }).eq('id', currentUser.id);
+    return 'ok';
+  };
+
   const updateEmployeeVacation = async (id: string, data: { vacationDaysTotal?: number; vacationRole?: string }) => {
     const prev = employees.find(e => e.id === id);
     setEmployees(p => p.map(e => e.id === id
@@ -255,7 +280,7 @@ export function VacationProvider({ initialUser, onLogout, children }: Props) {
     <VacationContext.Provider value={{
       employees, vacationRequests, currentUser,
       submitRequest, approveRequest, rejectRequest, deleteRequest, cancelRequest,
-      updateEmployeeVacation,
+      updateEmployeeVacation, deleteEmployee, changePassword,
       getUsedDays, getRemainingDays,
       logout: onLogout,
     }}>
