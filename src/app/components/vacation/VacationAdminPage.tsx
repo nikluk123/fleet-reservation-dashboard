@@ -1,5 +1,6 @@
 import { useState } from 'react';
-import { Save, X, CheckCircle, Clock, XCircle, Trash2, Edit, Plus, UserPlus } from 'lucide-react';
+import { Save, X, CheckCircle, Clock, XCircle, Trash2, Edit, Plus, UserPlus, Download } from 'lucide-react';
+import * as XLSX from 'xlsx';
 import { useVacation } from '../../context/VacationContext';
 import { type VacationRequest } from '../../data/vacationTypes';
 import { type Employee } from '../../data/mockData';
@@ -60,6 +61,29 @@ function EmployeesTab() {
   const topLevelDepts = departments.filter(d => !d.parent);
   const subDepts = (parentId: string) => departments.filter(d => d.parent === parentId);
 
+  const exportToExcel = () => {
+    const exportDate = new Date().toLocaleDateString('en-GB');
+    const rows = employees.map(emp => {
+      const used = getUsedDays(emp.id);
+      const total = emp.vacationDaysTotal ?? 20;
+      return {
+        'Name':             emp.name,
+        'Email':            emp.email,
+        'Sector':           emp.sector,
+        'Vacation Role':    emp.vacationRole === 'admin' ? 'Admin' : emp.vacationRole === 'sector_admin' ? 'Sector Admin' : 'Employee',
+        'Total Days':       total,
+        'Used Days (YTD)':  used,
+        'Remaining Days':   total - used,
+        'Export Date':      exportDate,
+      };
+    });
+    const ws = XLSX.utils.json_to_sheet(rows);
+    ws['!cols'] = [20, 30, 20, 15, 12, 16, 16, 14].map(w => ({ wch: w }));
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, 'Employees');
+    XLSX.writeFile(wb, `employees_${new Date().toISOString().split('T')[0]}.xlsx`);
+  };
+
   const handleAdd = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!newEmp.name || !newEmp.email || !newEmp.sector) return;
@@ -97,13 +121,22 @@ function EmployeesTab() {
     <div>
       <div className="flex items-center justify-between mb-4">
         <h3 className="text-white font-semibold">Employees ({employees.length})</h3>
-        <button
-          onClick={() => { setShowAddForm(v => !v); setNewEmp(emptyForm); }}
-          className="flex items-center gap-2 px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg text-sm transition-colors font-medium"
-        >
-          <UserPlus className="w-4 h-4" />
-          Add Employee
-        </button>
+        <div className="flex gap-2">
+          <button
+            onClick={exportToExcel}
+            className="flex items-center gap-2 px-4 py-2 bg-[#0f1117] border border-gray-700 hover:border-gray-500 text-gray-400 hover:text-white rounded-lg text-sm transition-colors"
+          >
+            <Download className="w-4 h-4" />
+            Export Excel
+          </button>
+          <button
+            onClick={() => { setShowAddForm(v => !v); setNewEmp(emptyForm); }}
+            className="flex items-center gap-2 px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg text-sm transition-colors font-medium"
+          >
+            <UserPlus className="w-4 h-4" />
+            Add Employee
+          </button>
+        </div>
       </div>
 
       {showAddForm && (
