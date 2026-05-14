@@ -17,6 +17,7 @@ interface VacationContextType {
   cancelRequest: (id: string) => Promise<void>;
 
   updateEmployeeVacation: (id: string, data: { vacationDaysTotal?: number; vacationRole?: string }) => Promise<void>;
+  addEmployee: (data: { name: string; email: string; password: string; sector: string; vacationDaysTotal: number; vacationRole: string }) => Promise<void>;
   deleteEmployee: (id: string) => Promise<void>;
   changePassword: (currentPwd: string, newPwd: string) => Promise<'ok' | 'wrong-password'>;
 
@@ -213,6 +214,36 @@ export function VacationProvider({ initialUser, onLogout, children }: Props) {
     }
   };
 
+  const addEmployee = async (data: { name: string; email: string; password: string; sector: string; vacationDaysTotal: number; vacationRole: string }) => {
+    const id = Date.now().toString();
+    const newEmp = {
+      id,
+      name: data.name,
+      email: data.email,
+      sector: data.sector,
+      role: 'user' as const,
+      vacationRole: data.vacationRole as any,
+      vacationDaysTotal: data.vacationDaysTotal,
+    };
+    setEmployees(p => [...p, newEmp]);
+    const { error } = await supabase.from('employees').insert({
+      id,
+      name: data.name,
+      email: data.email,
+      password: data.password,
+      sector: data.sector,
+      role: 'user',
+      vacation_role: data.vacationRole,
+      vacation_days_total: data.vacationDaysTotal,
+    });
+    if (error) {
+      setEmployees(p => p.filter(e => e.id !== id));
+      toast.error('Failed to add employee');
+    } else {
+      toast.success('Employee added');
+    }
+  };
+
   const deleteEmployee = async (id: string) => {
     const prev = employees.find(e => e.id === id);
     setEmployees(p => p.filter(e => e.id !== id));
@@ -279,7 +310,7 @@ export function VacationProvider({ initialUser, onLogout, children }: Props) {
     <VacationContext.Provider value={{
       employees, vacationRequests, currentUser,
       submitRequest, approveRequest, rejectRequest, deleteRequest, cancelRequest,
-      updateEmployeeVacation, deleteEmployee, changePassword,
+      updateEmployeeVacation, addEmployee, deleteEmployee, changePassword,
       getUsedDays, getRemainingDays,
       logout: onLogout,
     }}>

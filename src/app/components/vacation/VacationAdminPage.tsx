@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Save, X, CheckCircle, Clock, XCircle, Trash2, Edit } from 'lucide-react';
+import { Save, X, CheckCircle, Clock, XCircle, Trash2, Edit, Plus, UserPlus } from 'lucide-react';
 import { useVacation } from '../../context/VacationContext';
 import { type VacationRequest } from '../../data/vacationTypes';
 import { type Employee } from '../../data/mockData';
@@ -47,10 +47,30 @@ export function VacationAdminPage() {
 
 // ── Employees Tab ──────────────────────────────────────────────────────────────
 
+const SECTORS = ['IT', 'HR', 'Finance', 'Marketing', 'Operations', 'Sales', 'Legal', 'Management'];
+
+const emptyForm = { name: '', email: '', password: '', sector: '', vacationDaysTotal: 20, vacationRole: 'user' };
+
 function EmployeesTab() {
-  const { employees, updateEmployeeVacation, deleteEmployee, getUsedDays } = useVacation();
+  const { employees, updateEmployeeVacation, addEmployee, deleteEmployee, getUsedDays } = useVacation();
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editData, setEditData] = useState<{ vacationDaysTotal: number; vacationRole: string }>({ vacationDaysTotal: 20, vacationRole: 'user' });
+  const [showAddForm, setShowAddForm] = useState(false);
+  const [newEmp, setNewEmp] = useState(emptyForm);
+  const [saving, setSaving] = useState(false);
+
+  const existingSectors = [...new Set(employees.map(e => e.sector))].sort();
+  const sectorOptions = [...new Set([...SECTORS, ...existingSectors])].sort();
+
+  const handleAdd = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newEmp.name || !newEmp.email || !newEmp.password || !newEmp.sector) return;
+    setSaving(true);
+    await addEmployee(newEmp);
+    setSaving(false);
+    setNewEmp(emptyForm);
+    setShowAddForm(false);
+  };
 
   const startEdit = (emp: Employee) => {
     setEditingId(emp.id);
@@ -77,7 +97,106 @@ function EmployeesTab() {
 
   return (
     <div>
-      <h3 className="text-white font-semibold mb-4">Employees ({employees.length})</h3>
+      <div className="flex items-center justify-between mb-4">
+        <h3 className="text-white font-semibold">Employees ({employees.length})</h3>
+        <button
+          onClick={() => { setShowAddForm(v => !v); setNewEmp(emptyForm); }}
+          className="flex items-center gap-2 px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg text-sm transition-colors font-medium"
+        >
+          <UserPlus className="w-4 h-4" />
+          Add Employee
+        </button>
+      </div>
+
+      {showAddForm && (
+        <form onSubmit={handleAdd} className="bg-[#0f1117] border border-green-500/30 rounded-xl p-5 mb-5 space-y-4">
+          <h4 className="text-white font-medium flex items-center gap-2">
+            <Plus className="w-4 h-4 text-green-400" /> New Employee
+          </h4>
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className="block text-gray-400 text-xs mb-1">Full Name *</label>
+              <input
+                type="text"
+                value={newEmp.name}
+                onChange={e => setNewEmp({ ...newEmp, name: e.target.value })}
+                required
+                placeholder="John Doe"
+                className={inputCls}
+              />
+            </div>
+            <div>
+              <label className="block text-gray-400 text-xs mb-1">Email *</label>
+              <input
+                type="email"
+                value={newEmp.email}
+                onChange={e => setNewEmp({ ...newEmp, email: e.target.value })}
+                required
+                placeholder="john@company.com"
+                className={inputCls}
+              />
+            </div>
+            <div>
+              <label className="block text-gray-400 text-xs mb-1">Password *</label>
+              <input
+                type="text"
+                value={newEmp.password}
+                onChange={e => setNewEmp({ ...newEmp, password: e.target.value })}
+                required
+                placeholder="Initial password"
+                className={inputCls}
+              />
+            </div>
+            <div>
+              <label className="block text-gray-400 text-xs mb-1">Sector *</label>
+              <input
+                type="text"
+                value={newEmp.sector}
+                onChange={e => setNewEmp({ ...newEmp, sector: e.target.value })}
+                required
+                placeholder="e.g. IT"
+                list="sector-list"
+                className={inputCls}
+              />
+              <datalist id="sector-list">
+                {sectorOptions.map(s => <option key={s} value={s} />)}
+              </datalist>
+            </div>
+            <div>
+              <label className="block text-gray-400 text-xs mb-1">Vacation Role</label>
+              <select
+                value={newEmp.vacationRole}
+                onChange={e => setNewEmp({ ...newEmp, vacationRole: e.target.value })}
+                className={inputCls}
+              >
+                <option value="user">Employee</option>
+                <option value="sector_admin">Sector Admin</option>
+                <option value="admin">Admin</option>
+              </select>
+            </div>
+            <div>
+              <label className="block text-gray-400 text-xs mb-1">Vacation Days / Year</label>
+              <input
+                type="number"
+                min={0}
+                max={365}
+                value={newEmp.vacationDaysTotal}
+                onChange={e => setNewEmp({ ...newEmp, vacationDaysTotal: parseInt(e.target.value) || 0 })}
+                className={inputCls}
+              />
+            </div>
+          </div>
+          <div className="flex justify-end gap-2 pt-1">
+            <button type="button" onClick={() => setShowAddForm(false)} className="px-4 py-2 border border-gray-700 text-gray-400 rounded-lg text-sm hover:bg-gray-800 transition-colors">
+              Cancel
+            </button>
+            <button type="submit" disabled={saving} className="px-4 py-2 bg-green-600 hover:bg-green-700 disabled:bg-gray-700 text-white rounded-lg text-sm transition-colors font-medium">
+              {saving ? 'Saving...' : 'Add Employee'}
+            </button>
+          </div>
+        </form>
+      )}
+
       <div className="overflow-x-auto">
         <table className="w-full">
           <thead>
