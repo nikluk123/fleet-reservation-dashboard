@@ -7,15 +7,7 @@ export function VacationCalendarPage() {
   const { vacationRequests, currentUser } = useVacation();
   const [monthOffset, setMonthOffset] = useState(0);
 
-  const isAdmin = currentUser.vacationRole === 'admin';
-  const isSectorAdmin = currentUser.vacationRole === 'sector_admin';
-
-  const visibleRequests = vacationRequests.filter(r => {
-    if (r.status === 'rejected') return false;
-    if (isAdmin) return true;
-    if (isSectorAdmin) return r.sector === currentUser.sector;
-    return true;
-  });
+  const visibleRequests = vacationRequests.filter(r => r.status !== 'rejected');
 
   const now = new Date();
   const viewDate = new Date(now.getFullYear(), now.getMonth() + monthOffset, 1);
@@ -59,9 +51,6 @@ export function VacationCalendarPage() {
           <h2 className="text-2xl font-semibold text-white flex items-center gap-3">
             <CalendarIcon className="w-7 h-7 text-green-400" />
             Leave Calendar
-            {isSectorAdmin && !isAdmin && (
-              <span className="text-sm font-normal text-gray-400">— {currentUser.sector}</span>
-            )}
           </h2>
           <div className="flex items-center gap-3">
             <button onClick={() => setMonthOffset(monthOffset - 1)} className="p-2 rounded-lg bg-[#0f1117] border border-gray-700 hover:bg-gray-800 transition-colors">

@@ -84,7 +84,6 @@ export function VacationApp({ onSwitchToFleet }: Props) {
       case 'my-requests':
         return <MyVacationPage />;
       case 'calendar':
-        if (!isAdmin) return null;
         return <VacationCalendarPage />;
       case 'admin':
         if (!isAdmin) return null;
