@@ -50,14 +50,15 @@ export function VacationAdminPage() {
 const emptyForm = { name: '', email: '', sector: '', vacationDaysTotal: 20, vacationRole: 'user' };
 
 function EmployeesTab() {
-  const { employees, updateEmployeeVacation, addEmployee, deleteEmployee, getUsedDays } = useVacation();
+  const { employees, departments, updateEmployeeVacation, addEmployee, deleteEmployee, getUsedDays } = useVacation();
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editData, setEditData] = useState<{ vacationDaysTotal: number; vacationRole: string }>({ vacationDaysTotal: 20, vacationRole: 'user' });
   const [showAddForm, setShowAddForm] = useState(false);
   const [newEmp, setNewEmp] = useState(emptyForm);
   const [saving, setSaving] = useState(false);
 
-  const sectorOptions = [...new Set(employees.map(e => e.sector))].sort();
+  const topLevelDepts = departments.filter(d => !d.parent);
+  const subDepts = (parentId: string) => departments.filter(d => d.parent === parentId);
 
   const handleAdd = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -135,18 +136,22 @@ function EmployeesTab() {
             </div>
             <div>
               <label className="block text-gray-400 text-xs mb-1">Sector *</label>
-              <input
-                type="text"
+              <select
                 value={newEmp.sector}
                 onChange={e => setNewEmp({ ...newEmp, sector: e.target.value })}
                 required
-                placeholder="e.g. IT"
-                list="sector-list"
                 className={inputCls}
-              />
-              <datalist id="sector-list">
-                {sectorOptions.map(s => <option key={s} value={s} />)}
-              </datalist>
+              >
+                <option value="">Select sector</option>
+                {topLevelDepts.map(dept => (
+                  <optgroup key={dept.id} label={dept.name}>
+                    <option value={dept.name}>{dept.name}</option>
+                    {subDepts(dept.id).map(sub => (
+                      <option key={sub.id} value={`${dept.name} - ${sub.name}`}>{dept.name} - {sub.name}</option>
+                    ))}
+                  </optgroup>
+                ))}
+              </select>
             </div>
             <div>
               <label className="block text-gray-400 text-xs mb-1">Vacation Role</label>

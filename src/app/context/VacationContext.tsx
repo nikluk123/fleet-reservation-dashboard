@@ -7,6 +7,7 @@ import { toast } from 'sonner';
 
 interface VacationContextType {
   employees: Employee[];
+  departments: { id: string; name: string; parent?: string }[];
   vacationRequests: VacationRequest[];
   currentUser: Employee;
 
@@ -67,6 +68,7 @@ interface Props {
 
 export function VacationProvider({ initialUser, onLogout, children }: Props) {
   const [employees, setEmployees] = useState<Employee[]>([]);
+  const [departments, setDepartments] = useState<{ id: string; name: string; parent?: string }[]>([]);
   const [vacationRequests, setVacationRequests] = useState<VacationRequest[]>([]);
   const [currentUser, setCurrentUser] = useState<Employee>(initialUser);
   const [loading, setLoading] = useState(true);
@@ -76,12 +78,14 @@ export function VacationProvider({ initialUser, onLogout, children }: Props) {
     Promise.all([
       supabase.from('employees').select('*').order('name'),
       supabase.from('vacation_requests').select('*').order('created_at', { ascending: false }),
-    ]).then(([empRes, reqRes]) => {
+      supabase.from('departments').select('*').order('name'),
+    ]).then(([empRes, reqRes, deptRes]) => {
       if (empRes.error) { setLoadError(empRes.error.message); setLoading(false); return; }
       if (reqRes.error) { setLoadError(reqRes.error.message); setLoading(false); return; }
       const emps = (empRes.data ?? []).map(mapEmployee);
       setEmployees(emps);
       setVacationRequests((reqRes.data ?? []).map(mapRequest));
+      setDepartments((deptRes.data ?? []).map((d: any) => ({ id: d.id, name: d.name, parent: d.parent ?? undefined })));
       const me = emps.find(e => e.id === initialUser.id);
       if (me) setCurrentUser(me);
       setLoading(false);
@@ -308,7 +312,7 @@ export function VacationProvider({ initialUser, onLogout, children }: Props) {
 
   return (
     <VacationContext.Provider value={{
-      employees, vacationRequests, currentUser,
+      employees, departments, vacationRequests, currentUser,
       submitRequest, approveRequest, rejectRequest, deleteRequest, cancelRequest,
       updateEmployeeVacation, addEmployee, deleteEmployee, changePassword,
       getUsedDays, getRemainingDays,
