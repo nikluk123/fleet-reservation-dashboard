@@ -47,9 +47,7 @@ export function VacationAdminPage() {
 
 // ── Employees Tab ──────────────────────────────────────────────────────────────
 
-const SECTORS = ['IT', 'HR', 'Finance', 'Marketing', 'Operations', 'Sales', 'Legal', 'Management'];
-
-const emptyForm = { name: '', email: '', password: '', sector: '', vacationDaysTotal: 20, vacationRole: 'user' };
+const emptyForm = { name: '', email: '', sector: '', vacationDaysTotal: 20, vacationRole: 'user' };
 
 function EmployeesTab() {
   const { employees, updateEmployeeVacation, addEmployee, deleteEmployee, getUsedDays } = useVacation();
@@ -59,14 +57,13 @@ function EmployeesTab() {
   const [newEmp, setNewEmp] = useState(emptyForm);
   const [saving, setSaving] = useState(false);
 
-  const existingSectors = [...new Set(employees.map(e => e.sector))].sort();
-  const sectorOptions = [...new Set([...SECTORS, ...existingSectors])].sort();
+  const sectorOptions = [...new Set(employees.map(e => e.sector))].sort();
 
   const handleAdd = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!newEmp.name || !newEmp.email || !newEmp.password || !newEmp.sector) return;
+    if (!newEmp.name || !newEmp.email || !newEmp.sector) return;
     setSaving(true);
-    await addEmployee(newEmp);
+    await addEmployee({ ...newEmp, password: 'fleet2026' });
     setSaving(false);
     setNewEmp(emptyForm);
     setShowAddForm(false);
@@ -137,17 +134,6 @@ function EmployeesTab() {
               />
             </div>
             <div>
-              <label className="block text-gray-400 text-xs mb-1">Password *</label>
-              <input
-                type="text"
-                value={newEmp.password}
-                onChange={e => setNewEmp({ ...newEmp, password: e.target.value })}
-                required
-                placeholder="Initial password"
-                className={inputCls}
-              />
-            </div>
-            <div>
               <label className="block text-gray-400 text-xs mb-1">Sector *</label>
               <input
                 type="text"
@@ -201,7 +187,7 @@ function EmployeesTab() {
         <table className="w-full">
           <thead>
             <tr className="border-b border-gray-800">
-              {['Name', 'Sector', 'Vacation Role', 'Total Days', 'Used', 'Remaining', ''].map(h => (
+              {['Name', 'Email', 'Sector', 'Vacation Role', 'Total Days', 'Used', 'Remaining', ''].map(h => (
                 <th key={h} className="text-left text-gray-400 text-sm font-medium py-3 px-4">{h}</th>
               ))}
             </tr>
@@ -215,6 +201,7 @@ function EmployeesTab() {
                   {editingId === emp.id ? (
                     <>
                       <td className="py-3 px-4 text-white">{emp.name}</td>
+                      <td className="py-3 px-4 text-gray-400 text-xs">{emp.email}</td>
                       <td className="py-3 px-4 text-gray-400 text-sm">{emp.sector}</td>
                       <td className="py-2 px-4">
                         <select
@@ -249,6 +236,7 @@ function EmployeesTab() {
                   ) : (
                     <>
                       <td className="py-3 px-4 text-white">{emp.name}</td>
+                      <td className="py-3 px-4 text-gray-400 text-xs">{emp.email}</td>
                       <td className="py-3 px-4 text-gray-400 text-sm">{emp.sector}</td>
                       <td className="py-3 px-4">
                         <span className={`px-2 py-1 rounded-full text-xs ${roleColor(emp.vacationRole ?? 'user')}`}>
