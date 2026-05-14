@@ -20,12 +20,7 @@ function PendingSection() {
   const isAdmin = currentUser.vacationRole === 'admin';
   const isSectorAdmin = currentUser.vacationRole === 'sector_admin';
 
-  const pending = vacationRequests.filter(r => {
-    if (r.status !== 'pending') return false;
-    if (isAdmin) return true;
-    if (isSectorAdmin) return r.sector === currentUser.sector;
-    return r.employeeId === currentUser.id;
-  });
+  const pending = vacationRequests.filter(r => r.status === 'pending');
 
   if (pending.length === 0) return null;
 
