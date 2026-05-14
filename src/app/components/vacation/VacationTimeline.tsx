@@ -24,8 +24,11 @@ export function VacationTimeline() {
 
   const weekDates = getWeekDates(weekOffset);
 
+  const toLocalDateStr = (date: Date) =>
+    `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
+
   const getRequestForDate = (employeeId: string, date: Date): VacationRequest | null => {
-    const dateStr = date.toISOString().split('T')[0];
+    const dateStr = toLocalDateStr(date);
     return vacationRequests.find(r => {
       if (r.employeeId !== employeeId) return false;
       if (r.status === 'rejected') return false;
