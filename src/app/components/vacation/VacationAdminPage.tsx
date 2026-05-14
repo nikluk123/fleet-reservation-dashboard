@@ -282,7 +282,10 @@ function RequestsTab() {
   const isFullAdmin = currentUser.vacationRole === 'admin';
 
   const visible = vacationRequests.filter(r => {
-    if (!isFullAdmin && r.sector !== currentUser.sector) return false;
+    if (!isFullAdmin) {
+      const parentSector = r.sector.includes(' - ') ? r.sector.split(' - ')[0] : r.sector;
+      if (parentSector !== currentUser.sector && r.sector !== currentUser.sector) return false;
+    }
     if (filter !== 'all' && r.status !== filter) return false;
     return true;
   });
