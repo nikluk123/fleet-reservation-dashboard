@@ -124,10 +124,9 @@ export function VacationProvider({ initialUser, onLogout, children }: Props) {
 
     toast.success('Vacation request submitted');
 
-    // Notify sector admins + main admins
+    // Notify only sector admins for that sector (main admin sees all in panel)
     const recipients = employees.filter(e =>
-      (e.vacationRole === 'sector_admin' && e.sector === req.sector) ||
-      e.vacationRole === 'admin'
+      e.vacationRole === 'sector_admin' && e.sector === req.sector
     );
     if (recipients.length > 0) notifyVacationAdmins(req, recipients);
   };
