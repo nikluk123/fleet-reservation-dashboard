@@ -79,18 +79,18 @@ export function VacationSidebar({ activeView, setActiveView, onSwitchToFleet, on
 
       <div className="p-4 border-t border-gray-800 space-y-1">
         <button
-          onClick={onSettingsClick}
-          className="w-full flex items-center gap-3 px-4 py-3 rounded-lg text-gray-400 hover:bg-gray-800/50 hover:text-white transition-all"
-        >
-          <Settings className="w-5 h-5" />
-          <span className="font-medium">Settings</span>
-        </button>
-        <button
           onClick={onSwitchToFleet}
           className="w-full flex items-center gap-3 px-4 py-3 rounded-lg text-gray-400 hover:bg-blue-500/10 hover:text-blue-400 transition-all text-sm"
         >
           <span className="text-base">🚗</span>
           <span className="font-medium">Switch to Fleet</span>
+        </button>
+        <button
+          onClick={onSettingsClick}
+          className="w-full flex items-center gap-3 px-4 py-3 rounded-lg text-gray-400 hover:bg-gray-800/50 hover:text-white transition-all"
+        >
+          <Settings className="w-5 h-5" />
+          <span className="font-medium">Settings</span>
         </button>
         <button
           onClick={logout}
