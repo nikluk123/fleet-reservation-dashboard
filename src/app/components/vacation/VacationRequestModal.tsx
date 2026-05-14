@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
-import { X, AlertCircle, CheckCircle } from 'lucide-react';
+import { X, AlertCircle, CheckCircle, Search } from 'lucide-react';
 import { useVacation } from '../../context/VacationContext';
 import { countWorkingDays } from '../../data/vacationTypes';
+import { type Employee } from '../../data/mockData';
 
 interface Props {
   isOpen: boolean;
@@ -9,14 +10,20 @@ interface Props {
 }
 
 export function VacationRequestModal({ isOpen, onClose }: Props) {
-  const { currentUser, vacationRequests, submitRequest, getRemainingDays } = useVacation();
+  const { currentUser, employees, vacationRequests, submitRequest, getRemainingDays } = useVacation();
+
+  const isAdmin = currentUser.vacationRole === 'admin';
+
+  const [selectedEmployee, setSelectedEmployee] = useState<Employee>(currentUser);
+  const [employeeSearch, setEmployeeSearch] = useState(currentUser.name);
+  const [showDropdown, setShowDropdown] = useState(false);
   const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState('');
   const [notes, setNotes] = useState('');
   const [submitting, setSubmitting] = useState(false);
 
   const today = new Date().toISOString().split('T')[0];
-  const remaining = getRemainingDays(currentUser.id);
+  const remaining = getRemainingDays(selectedEmployee.id);
 
   const daysCount = startDate && endDate && endDate >= startDate
     ? countWorkingDays(startDate, endDate)
@@ -24,7 +31,7 @@ export function VacationRequestModal({ isOpen, onClose }: Props) {
 
   const hasOverlap = startDate && endDate
     ? vacationRequests.some(r =>
-        r.employeeId === currentUser.id &&
+        r.employeeId === selectedEmployee.id &&
         r.status !== 'rejected' &&
         r.startDate <= endDate &&
         r.endDate >= startDate
@@ -32,25 +39,40 @@ export function VacationRequestModal({ isOpen, onClose }: Props) {
     : false;
 
   const insufficientDays = daysCount > remaining;
-
   const canSubmit = daysCount > 0 && !hasOverlap && !insufficientDays;
+
+  const filteredEmployees = employees.filter(e =>
+    e.name.toLowerCase().includes(employeeSearch.toLowerCase()) ||
+    e.email.toLowerCase().includes(employeeSearch.toLowerCase())
+  );
 
   useEffect(() => {
     if (!isOpen) {
+      setSelectedEmployee(currentUser);
+      setEmployeeSearch(currentUser.name);
       setStartDate('');
       setEndDate('');
       setNotes('');
+      setShowDropdown(false);
     }
   }, [isOpen]);
+
+  const handleEmployeeSelect = (emp: Employee) => {
+    setSelectedEmployee(emp);
+    setEmployeeSearch(emp.name);
+    setShowDropdown(false);
+    setStartDate('');
+    setEndDate('');
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!canSubmit) return;
     setSubmitting(true);
     await submitRequest({
-      employeeId:   currentUser.id,
-      employeeName: currentUser.name,
-      sector:       currentUser.sector,
+      employeeId:   selectedEmployee.id,
+      employeeName: selectedEmployee.name,
+      sector:       selectedEmployee.sector,
       startDate,
       endDate,
       daysCount,
@@ -73,9 +95,55 @@ export function VacationRequestModal({ isOpen, onClose }: Props) {
         </div>
 
         <form onSubmit={handleSubmit} className="p-6 space-y-4">
+          {/* Employee selector */}
+          <div className="relative">
+            <label className="block text-gray-400 text-sm mb-2">Employee *</label>
+            {isAdmin ? (
+              <>
+                <div className="relative">
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                  <input
+                    type="text"
+                    value={employeeSearch}
+                    onChange={e => { setEmployeeSearch(e.target.value); setShowDropdown(true); }}
+                    onFocus={() => setShowDropdown(true)}
+                    placeholder="Search employees..."
+                    className="w-full bg-[#0f1117] border border-gray-700 rounded-lg pl-10 pr-4 py-2.5 text-white focus:outline-none focus:border-green-500 focus:ring-2 focus:ring-green-500/20"
+                  />
+                </div>
+                {showDropdown && filteredEmployees.length > 0 && (
+                  <>
+                    <div className="fixed inset-0 z-10" onClick={() => setShowDropdown(false)} />
+                    <div className="absolute z-20 w-full mt-1 bg-[#1a1d29] border border-gray-700 rounded-lg shadow-xl max-h-52 overflow-y-auto">
+                      {filteredEmployees.map(emp => (
+                        <button
+                          key={emp.id}
+                          type="button"
+                          onClick={() => handleEmployeeSelect(emp)}
+                          className="w-full text-left px-4 py-3 hover:bg-gray-800 transition-colors border-b border-gray-800 last:border-b-0"
+                        >
+                          <div className="text-white font-medium">{emp.name}</div>
+                          <div className="text-gray-400 text-xs">{emp.sector} · {getRemainingDays(emp.id)} days remaining</div>
+                        </button>
+                      ))}
+                    </div>
+                  </>
+                )}
+              </>
+            ) : (
+              <div className="w-full bg-gray-800/50 border border-gray-700 rounded-lg px-4 py-2.5 text-gray-400 cursor-not-allowed">
+                {currentUser.name}
+              </div>
+            )}
+          </div>
+
           {/* Remaining days info */}
           <div className="bg-[#0f1117] border border-gray-700 rounded-lg px-4 py-3 flex items-center justify-between">
-            <span className="text-gray-400 text-sm">Available vacation days</span>
+            <span className="text-gray-400 text-sm">
+              {isAdmin && selectedEmployee.id !== currentUser.id
+                ? `${selectedEmployee.name}'s available days`
+                : 'Your available days'}
+            </span>
             <span className={`text-lg font-bold ${remaining <= 3 ? 'text-red-400' : remaining <= 7 ? 'text-orange-400' : 'text-green-400'}`}>
               {remaining} days
             </span>
@@ -106,7 +174,6 @@ export function VacationRequestModal({ isOpen, onClose }: Props) {
             </div>
           </div>
 
-          {/* Days count preview */}
           {daysCount > 0 && (
             <div className="bg-[#0f1117] border border-gray-700 rounded-lg px-4 py-3 flex items-center justify-between">
               <span className="text-gray-400 text-sm">Working days requested</span>
@@ -114,18 +181,21 @@ export function VacationRequestModal({ isOpen, onClose }: Props) {
             </div>
           )}
 
-          {/* Errors */}
           {hasOverlap && (
             <div className="bg-red-500/10 border border-red-500/50 rounded-lg p-4 flex items-start gap-3">
               <AlertCircle className="w-5 h-5 text-red-500 mt-0.5" />
-              <p className="text-red-400 text-sm">You already have a vacation request overlapping these dates.</p>
+              <p className="text-red-400 text-sm">
+                {selectedEmployee.id === currentUser.id ? 'You already have' : `${selectedEmployee.name} already has`} a vacation request overlapping these dates.
+              </p>
             </div>
           )}
 
           {insufficientDays && !hasOverlap && (
             <div className="bg-red-500/10 border border-red-500/50 rounded-lg p-4 flex items-start gap-3">
               <AlertCircle className="w-5 h-5 text-red-500 mt-0.5" />
-              <p className="text-red-400 text-sm">Not enough remaining days. You requested {daysCount} but only have {remaining} left.</p>
+              <p className="text-red-400 text-sm">
+                Not enough days. Requested {daysCount}, only {remaining} available.
+              </p>
             </div>
           )}
 
@@ -133,7 +203,7 @@ export function VacationRequestModal({ isOpen, onClose }: Props) {
             <div className="bg-green-500/10 border border-green-500/50 rounded-lg p-4 flex items-center gap-3">
               <CheckCircle className="w-5 h-5 text-green-500" />
               <p className="text-green-500 text-sm">
-                Requesting {daysCount} working days. {remaining - daysCount} will remain after approval.
+                {daysCount} working days · {remaining - daysCount} will remain after approval.
               </p>
             </div>
           )}
