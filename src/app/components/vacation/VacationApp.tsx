@@ -8,6 +8,7 @@ import { VacationRequestModal } from './VacationRequestModal';
 import { VacationSettingsModal } from './VacationSettingsModal';
 import { MyVacationPage } from './MyVacationPage';
 import { VacationAdminPage } from './VacationAdminPage';
+import { VacationCalendarPage } from './VacationCalendarPage';
 import { useVacation } from '../../context/VacationContext';
 
 interface Props {
@@ -87,6 +88,9 @@ export function VacationApp({ onSwitchToFleet }: Props) {
     switch (activeView) {
       case 'my-requests':
         return <MyVacationPage />;
+      case 'calendar':
+        if (!isAdmin) return null;
+        return <VacationCalendarPage />;
       case 'admin':
         if (!isAdmin) return null;
         return <VacationAdminPage />;

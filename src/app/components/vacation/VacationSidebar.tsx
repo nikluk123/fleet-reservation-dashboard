@@ -1,4 +1,4 @@
-import { LayoutDashboard, ClipboardList, Shield, LogOut, Palmtree, Settings } from 'lucide-react';
+import { LayoutDashboard, ClipboardList, Shield, Calendar, LogOut, Palmtree, Settings } from 'lucide-react';
 import { useVacation } from '../../context/VacationContext';
 
 interface VacationSidebarProps {
@@ -15,7 +15,10 @@ export function VacationSidebar({ activeView, setActiveView, onSwitchToFleet, on
   const menuItems = [
     { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
     { id: 'my-requests', label: 'My Requests', icon: ClipboardList },
-    ...(isAdmin ? [{ id: 'admin', label: 'Admin Panel', icon: Shield }] : []),
+    ...(isAdmin ? [
+      { id: 'calendar', label: 'Leave Calendar', icon: Calendar },
+      { id: 'admin', label: 'Admin Panel', icon: Shield },
+    ] : []),
   ];
 
   const roleLabel = currentUser.vacationRole === 'admin'
