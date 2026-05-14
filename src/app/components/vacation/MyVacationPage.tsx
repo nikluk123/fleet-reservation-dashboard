@@ -7,6 +7,7 @@ export function MyVacationPage() {
 
   const mine = vacationRequests.filter(r => r.employeeId === currentUser.id);
   const now = new Date().toISOString().split('T')[0];
+  const year = new Date().getFullYear();
 
   const active  = mine.filter(r => r.status === 'approved' && r.endDate >= now);
   const pending = mine.filter(r => r.status === 'pending');
@@ -17,6 +18,11 @@ export function MyVacationPage() {
   const remaining = getRemainingDays(currentUser.id);
   const pendingDays = mine.filter(r => r.status === 'pending').reduce((s, r) => s + r.daysCount, 0);
   const usedPct   = Math.min(100, Math.round((used / total) * 100));
+
+  // Days actually consumed YTD (startDate already passed)
+  const ytdUsed = mine
+    .filter(r => r.status === 'approved' && r.startDate <= now && new Date(r.startDate).getFullYear() === year)
+    .reduce((s, r) => s + r.daysCount, 0);
 
   const getStatusStyle = (status: string) => {
     if (status === 'approved') return 'text-green-500 bg-green-500/10 border-green-500/50';
@@ -121,8 +127,8 @@ export function MyVacationPage() {
         <div className="grid grid-cols-3 gap-4">
           <div className="bg-[#0f1117] border border-gray-700 rounded-lg p-4">
             <p className="text-gray-400 text-sm mb-1">Used</p>
-            <p className="text-2xl font-bold text-white">{used}</p>
-            <p className="text-gray-500 text-xs">days approved</p>
+            <p className="text-2xl font-bold text-white">{ytdUsed}</p>
+            <p className="text-gray-500 text-xs">days taken YTD</p>
           </div>
           <div className="bg-[#0f1117] border border-gray-700 rounded-lg p-4">
             <p className="text-gray-400 text-sm mb-1">Pending</p>
