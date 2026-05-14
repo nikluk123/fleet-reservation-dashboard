@@ -9,6 +9,7 @@ import { VacationSettingsModal } from './VacationSettingsModal';
 import { MyVacationPage } from './MyVacationPage';
 import { VacationAdminPage } from './VacationAdminPage';
 import { VacationCalendarPage } from './VacationCalendarPage';
+import { VacationSummaryCards } from './VacationSummaryCards';
 import { useVacation } from '../../context/VacationContext';
 
 interface Props {
@@ -92,6 +93,7 @@ export function VacationApp({ onSwitchToFleet }: Props) {
       default:
         return (
           <>
+            <VacationSummaryCards />
             <div className="flex justify-end">
               <button
                 onClick={() => setIsModalOpen(true)}
