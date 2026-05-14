@@ -78,6 +78,8 @@ const mapEmployee = (row: any): Employee => ({
   email: row.email,
   sector: row.sector,
   role: row.role,
+  vacationRole: row.vacation_role ?? 'user',
+  vacationDaysTotal: row.vacation_days_total ?? 20,
 });
 
 const mapProject = (row: any): Project => ({

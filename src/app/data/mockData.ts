@@ -40,6 +40,8 @@ export interface Employee {
   email: string;
   sector: string;
   role: 'user' | 'admin';
+  vacationRole?: 'user' | 'sector_admin' | 'admin';
+  vacationDaysTotal?: number;
 }
 
 // Returns date string for current week: offset 0=Mon, 1=Tue, ..., 6=Sun

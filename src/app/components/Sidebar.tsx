@@ -6,6 +6,7 @@ interface SidebarProps {
   setActiveView: (view: string) => void;
   onSettingsClick: () => void;
   isAdmin?: boolean;
+  onSwitchToVacation?: () => void;
 }
 
 const allMenuItems = [
@@ -15,7 +16,7 @@ const allMenuItems = [
   { id: 'admin', label: 'Admin Panel', icon: Shield, adminOnly: true },
 ];
 
-export function Sidebar({ activeView, setActiveView, onSettingsClick, isAdmin = false }: SidebarProps) {
+export function Sidebar({ activeView, setActiveView, onSettingsClick, isAdmin = false, onSwitchToVacation }: SidebarProps) {
   const { currentUser, logout } = useFleet();
 
   const menuItems = allMenuItems.filter(item => !item.adminOnly || isAdmin);
@@ -75,6 +76,15 @@ export function Sidebar({ activeView, setActiveView, onSettingsClick, isAdmin = 
       </nav>
 
       <div className="p-4 border-t border-gray-800 space-y-1">
+        {onSwitchToVacation && (
+          <button
+            onClick={onSwitchToVacation}
+            className="w-full flex items-center gap-3 px-4 py-3 rounded-lg text-gray-400 hover:bg-green-500/10 hover:text-green-400 transition-all text-sm"
+          >
+            <span className="text-base">🏖️</span>
+            <span className="font-medium">Switch to Vacation</span>
+          </button>
+        )}
         <button
           onClick={onSettingsClick}
           className="w-full flex items-center gap-3 px-4 py-3 rounded-lg text-gray-400 hover:bg-gray-800/50 hover:text-white transition-all"

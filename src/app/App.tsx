@@ -2,6 +2,7 @@ import { useState, useMemo, useEffect } from 'react';
 import { Plus } from 'lucide-react';
 import { Toaster } from 'sonner';
 import { FleetProvider, useFleet } from './context/FleetContext';
+import { VacationProvider } from './context/VacationContext';
 import { Sidebar } from './components/Sidebar';
 import { Header } from './components/Header';
 import { SummaryCards } from './components/SummaryCards';
@@ -15,11 +16,12 @@ import { SettingsModal } from './components/SettingsModal';
 import { CalendarPage } from './components/CalendarPage';
 import { MyReservationsPage } from './components/MyReservationsPage';
 import { AdminPage } from './components/AdminPage';
-import { LoginPage } from './components/LoginPage';
+import { LoginPage, type Platform } from './components/LoginPage';
+import { VacationApp } from './components/vacation/VacationApp';
 import { type Vehicle, type Employee } from './data/mockData';
 import { supabase } from '../lib/supabaseClient';
 
-function AppContent() {
+function AppContent({ onSwitchToVacation }: { onSwitchToVacation: () => void }) {
   const {
     vehicles,
     reservations,
@@ -49,7 +51,6 @@ function AppContent() {
   const [dateRange, setDateRange] = useState({ start: todayStr, end: nextWeek.toISOString().split('T')[0] });
   const [filtersApplied, setFiltersApplied] = useState(false);
 
-  // Redirect non-admins away from admin/calendar views
   useEffect(() => {
     if (currentUser.role !== 'admin' && (activeView === 'admin' || activeView === 'calendar')) {
       setActiveView('dashboard');
@@ -179,6 +180,7 @@ function AppContent() {
         setActiveView={setActiveView}
         onSettingsClick={() => setIsSettingsModalOpen(true)}
         isAdmin={currentUser.role === 'admin'}
+        onSwitchToVacation={onSwitchToVacation}
       />
 
       <div className="flex-1 flex flex-col overflow-hidden">
@@ -219,9 +221,12 @@ function AppContent() {
 }
 
 export default function App() {
-  const [loggedInUserId, setLoggedInUserId] = useState<string | null>(() => {
-    return localStorage.getItem('fleetflow_user_id');
-  });
+  const [loggedInUserId, setLoggedInUserId] = useState<string | null>(() =>
+    localStorage.getItem('fleetflow_user_id')
+  );
+  const [activePlatform, setActivePlatform] = useState<Platform>(() =>
+    (localStorage.getItem('fleetflow_platform') as Platform) ?? 'fleet'
+  );
   const [loggedEmployee, setLoggedEmployee] = useState<Employee | null>(null);
   const [loadingUser, setLoadingUser] = useState(!!localStorage.getItem('fleetflow_user_id'));
 
@@ -235,12 +240,13 @@ export default function App() {
     setLoadingUser(true);
     supabase
       .from('employees')
-      .select('id, name, email, sector, role')
+      .select('id, name, email, sector, role, vacation_role, vacation_days_total')
       .eq('id', loggedInUserId)
       .single()
       .then(({ data, error }) => {
         if (error || !data) {
           localStorage.removeItem('fleetflow_user_id');
+          localStorage.removeItem('fleetflow_platform');
           setLoggedInUserId(null);
         } else {
           setLoggedEmployee({
@@ -249,15 +255,31 @@ export default function App() {
             email: data.email,
             sector: data.sector,
             role: data.role as 'admin' | 'user',
+            vacationRole: data.vacation_role ?? 'user',
+            vacationDaysTotal: data.vacation_days_total ?? 20,
           });
         }
         setLoadingUser(false);
       });
   }, [loggedInUserId]);
 
-  const handleLogin = (employeeId: string) => {
+  const handleLogin = (employeeId: string, platform: Platform) => {
     localStorage.setItem('fleetflow_user_id', employeeId);
+    localStorage.setItem('fleetflow_platform', platform);
+    setActivePlatform(platform);
     setLoggedInUserId(employeeId);
+  };
+
+  const handleLogout = () => {
+    localStorage.removeItem('fleetflow_user_id');
+    localStorage.removeItem('fleetflow_platform');
+    setLoggedInUserId(null);
+    setLoggedEmployee(null);
+  };
+
+  const handleSwitchPlatform = (to: Platform) => {
+    localStorage.setItem('fleetflow_platform', to);
+    setActivePlatform(to);
   };
 
   if (loadingUser) {
@@ -272,14 +294,22 @@ export default function App() {
     return (
       <>
         <Toaster position="top-right" richColors />
-        <LoginPage onLogin={handleLogin} />
+        <LoginPage onLogin={handleLogin} initialPlatform={activePlatform} />
       </>
+    );
+  }
+
+  if (activePlatform === 'vacation') {
+    return (
+      <VacationProvider initialUser={loggedEmployee} onLogout={handleLogout}>
+        <VacationApp onSwitchToFleet={() => handleSwitchPlatform('fleet')} />
+      </VacationProvider>
     );
   }
 
   return (
     <FleetProvider initialUser={loggedEmployee}>
-      <AppContent />
+      <AppContent onSwitchToVacation={() => handleSwitchPlatform('vacation')} />
     </FleetProvider>
   );
 }
