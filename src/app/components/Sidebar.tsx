@@ -24,14 +24,12 @@ export function Sidebar({ activeView, setActiveView, onSettingsClick, isAdmin = 
   return (
     <aside className="w-64 bg-app-surface border-r border-app-line flex flex-col">
       {/* Logo */}
-      <div className="p-6 border-b border-app-line">
+      <div className="p-5 border-b border-app-line">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-blue-700 rounded-lg flex items-center justify-center">
-            <Shield className="w-6 h-6 text-white" />
-          </div>
+          <img src="/logo.png" alt="NES Logo" className="h-9 w-auto" onError={e => { (e.target as HTMLImageElement).style.display = 'none'; }} />
           <div>
-            <h1 className="text-white font-semibold text-lg">FleetFlow</h1>
-            <p className="text-gray-400 text-xs">Fleet Management</p>
+            <h1 className="text-white font-semibold text-sm leading-tight">Fleet Reservations</h1>
+            <p className="text-gray-400 text-xs">New Energy Solutions</p>
           </div>
         </div>
       </div>

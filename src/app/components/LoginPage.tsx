@@ -104,11 +104,9 @@ export function LoginPage({ onLogin, initialPlatform = 'fleet' }: LoginPageProps
 
         {/* Logo */}
         <div className="flex flex-col items-center mb-8">
-          <div className={`w-14 h-14 rounded-2xl flex items-center justify-center shadow-lg mb-3 ${isFleet ? 'bg-gradient-to-br from-blue-500 to-blue-700 shadow-blue-500/30' : 'bg-gradient-to-br from-green-500 to-emerald-700 shadow-green-500/30'}`}>
-            {isFleet ? <Car className="w-8 h-8 text-white" /> : <Palmtree className="w-8 h-8 text-white" />}
-          </div>
-          <h1 className="text-white text-2xl font-bold">{isFleet ? 'FleetFlow' : 'LeaveFlow'}</h1>
-          <p className="text-gray-400 text-sm mt-1">{isFleet ? 'Fleet Management System' : 'Vacation Management System'}</p>
+          <img src="/logo.png" alt="New Energy Solutions" className="h-16 w-auto mb-3" onError={e => { (e.target as HTMLImageElement).style.display = 'none'; }} />
+          <h1 className="text-white text-2xl font-bold">New Energy Solutions</h1>
+          <p className="text-gray-400 text-sm mt-1">{isFleet ? 'Fleet Reservation System' : 'Vacation Management System'}</p>
         </div>
 
         <div className="bg-app-surface border border-app-line rounded-2xl p-8 shadow-2xl">
