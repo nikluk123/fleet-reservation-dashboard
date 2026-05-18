@@ -25,10 +25,10 @@ export function AdminPage() {
 
   return (
     <div className="space-y-6">
-      <div className="bg-[#1a1d29] border border-gray-800 rounded-xl p-6">
+      <div className="bg-app-surface border border-app-line rounded-xl p-6">
         <h2 className="text-2xl font-semibold text-white mb-6">Admin Panel</h2>
 
-        <div className="flex gap-1 mb-6 border-b border-gray-800 overflow-x-auto">
+        <div className="flex gap-1 mb-6 border-b border-app-line overflow-x-auto">
           {tabs.map((tab) => (
             <button
               key={tab.id}
@@ -101,7 +101,7 @@ function VehiclesTab({ vehicles, addVehicle, updateVehicle, deleteVehicle }: any
       <div className="overflow-x-auto">
         <table className="w-full">
           <thead>
-            <tr className="border-b border-gray-800">
+            <tr className="border-b border-app-line">
               {['Model', 'Plate', 'Type', 'Status', 'Location', ''].map(h => (
                 <th key={h} className="text-left text-gray-400 text-sm font-medium py-3 px-4">{h}</th>
               ))}
@@ -109,7 +109,7 @@ function VehiclesTab({ vehicles, addVehicle, updateVehicle, deleteVehicle }: any
           </thead>
           <tbody>
             {isAdding && (
-              <tr className="border-b border-gray-800 bg-blue-500/5">
+              <tr className="border-b border-app-line bg-blue-500/5">
                 <td className="py-2 px-4"><input className={inputCls} placeholder="Model" value={newVehicle.model} onChange={e => setNewVehicle({ ...newVehicle, model: e.target.value })} /></td>
                 <td className="py-2 px-4"><input className={inputCls} placeholder="Plate" value={newVehicle.plate} onChange={e => setNewVehicle({ ...newVehicle, plate: e.target.value })} /></td>
                 <td className="py-2 px-4"><Select options={types} value={newVehicle.type} onChange={v => setNewVehicle({ ...newVehicle, type: v })} /></td>
@@ -124,7 +124,7 @@ function VehiclesTab({ vehicles, addVehicle, updateVehicle, deleteVehicle }: any
               </tr>
             )}
             {vehicles.map((v: Vehicle) => (
-              <tr key={v.id} className="border-b border-gray-800 hover:bg-gray-800/20">
+              <tr key={v.id} className="border-b border-app-line hover:bg-app-hover/20">
                 {editingId === v.id ? (
                   <>
                     <td className="py-2 px-4"><input className={inputCls} value={editData.model ?? ''} onChange={e => setEditData({ ...editData, model: e.target.value })} /></td>
@@ -199,7 +199,7 @@ function EmployeesTab({ employees, departments, addEmployee, updateEmployee, del
       <div className="overflow-x-auto">
         <table className="w-full">
           <thead>
-            <tr className="border-b border-gray-800">
+            <tr className="border-b border-app-line">
               {['Name', 'Email', 'Sector', 'Role', ''].map(h => (
                 <th key={h} className="text-left text-gray-400 text-sm font-medium py-3 px-4">{h}</th>
               ))}
@@ -207,7 +207,7 @@ function EmployeesTab({ employees, departments, addEmployee, updateEmployee, del
           </thead>
           <tbody>
             {isAdding && (
-              <tr className="border-b border-gray-800 bg-blue-500/5">
+              <tr className="border-b border-app-line bg-blue-500/5">
                 <td className="py-2 px-4"><input className={inputCls} placeholder="Full name" value={newEmp.name} onChange={e => setNewEmp({ ...newEmp, name: e.target.value })} /></td>
                 <td className="py-2 px-4"><input className={inputCls} type="email" placeholder="email@company.com" value={newEmp.email} onChange={e => setNewEmp({ ...newEmp, email: e.target.value })} /></td>
                 <td className="py-2 px-4"><SectorSelect value={newEmp.sector} onChange={v => setNewEmp({ ...newEmp, sector: v })} /></td>
@@ -216,7 +216,7 @@ function EmployeesTab({ employees, departments, addEmployee, updateEmployee, del
               </tr>
             )}
             {employees.map((emp: Employee) => (
-              <tr key={emp.id} className="border-b border-gray-800 hover:bg-gray-800/20">
+              <tr key={emp.id} className="border-b border-app-line hover:bg-app-hover/20">
                 {editingId === emp.id ? (
                   <>
                     <td className="py-2 px-4"><input className={inputCls} value={editData.name ?? ''} onChange={e => setEditData({ ...editData, name: e.target.value })} /></td>
@@ -276,7 +276,7 @@ function ProjectsTab({ projects, addProject, updateProject, deleteProject }: any
       <div className="overflow-x-auto">
         <table className="w-full">
           <thead>
-            <tr className="border-b border-gray-800">
+            <tr className="border-b border-app-line">
               <th className="text-left text-gray-400 text-sm font-medium py-3 px-4">Project Name</th>
               <th className="text-left text-gray-400 text-sm font-medium py-3 px-4">Km / Day</th>
               <th className="py-3 px-4" />
@@ -284,14 +284,14 @@ function ProjectsTab({ projects, addProject, updateProject, deleteProject }: any
           </thead>
           <tbody>
             {isAdding && (
-              <tr className="border-b border-gray-800 bg-blue-500/5">
+              <tr className="border-b border-app-line bg-blue-500/5">
                 <td className="py-2 px-4"><input className={inputCls} placeholder="Project name" value={newProject.name} onChange={e => setNewProject({ ...newProject, name: e.target.value })} /></td>
                 <td className="py-2 px-4"><input className={inputCls} type="number" min={0} value={newProject.kmPerDay} onChange={e => setNewProject({ ...newProject, kmPerDay: parseInt(e.target.value) || 0 })} /></td>
                 <td className="py-2 px-4"><div className="flex gap-1 justify-end"><IconBtn icon={Save} color="green" onClick={handleAdd} /><IconBtn icon={X} color="red" onClick={() => setIsAdding(false)} /></div></td>
               </tr>
             )}
             {projects.map((p: Project) => (
-              <tr key={p.id} className="border-b border-gray-800 hover:bg-gray-800/20">
+              <tr key={p.id} className="border-b border-app-line hover:bg-app-hover/20">
                 {editingId === p.id ? (
                   <>
                     <td className="py-2 px-4"><input className={inputCls} value={editData.name ?? ''} onChange={e => setEditData({ ...editData, name: e.target.value })} /></td>
@@ -365,13 +365,13 @@ function SectorsTab({ sectors, addDepartment, deleteDepartment }: any) {
         {sectors.filter((s: Department) => !s.parent).map((sector: Department) => {
           const children = sectors.filter((s: Department) => s.parent === sector.id);
           return (
-            <div key={sector.id} className="bg-[#0f1117] border border-gray-700 rounded-lg p-4">
+            <div key={sector.id} className="bg-app-bg border border-app-line-muted rounded-lg p-4">
               <div className="flex items-center justify-between mb-2">
                 <span className="text-white font-medium">{sector.name}</span>
                 <IconBtn icon={Trash2} color="red" onClick={() => confirm('Delete this department and all sub-departments?') && deleteDepartment(sector.id)} />
               </div>
               {children.length > 0 && (
-                <div className="pl-4 space-y-1 border-l-2 border-gray-700 mt-2">
+                <div className="pl-4 space-y-1 border-l-2 border-app-line-muted mt-2">
                   {children.map((child: Department) => (
                     <div key={child.id} className="flex items-center justify-between py-1">
                       <span className="text-gray-400 text-sm">{child.name}</span>
@@ -410,7 +410,7 @@ function ReservationsTab({ reservations, vehicles, onApprove, onReject, onDelete
             <button
               key={f}
               onClick={() => setFilter(f)}
-              className={`px-3 py-1.5 rounded-lg text-sm transition-colors capitalize ${filter === f ? 'bg-blue-600 text-white' : 'text-gray-400 hover:bg-gray-800 hover:text-white'}`}
+              className={`px-3 py-1.5 rounded-lg text-sm transition-colors capitalize ${filter === f ? 'bg-blue-600 text-white' : 'text-gray-400 hover:bg-app-hover hover:text-white'}`}
             >
               {f}
             </button>
@@ -423,7 +423,7 @@ function ReservationsTab({ reservations, vehicles, onApprove, onReject, onDelete
         {filtered.map((res: any) => {
           const vehicle = vehicles.find((v: any) => v.id === res.vehicleId);
           return (
-            <div key={res.id} className="bg-[#0f1117] border border-gray-700 rounded-lg p-4 flex items-center justify-between gap-4">
+            <div key={res.id} className="bg-app-bg border border-app-line-muted rounded-lg p-4 flex items-center justify-between gap-4">
               <div className="flex items-center gap-3 min-w-0">
                 {getStatusIcon(res.status)}
                 <div className="min-w-0">
@@ -456,7 +456,7 @@ function ReservationsTab({ reservations, vehicles, onApprove, onReject, onDelete
 
 // ── Shared helpers ────────────────────────────────────────────────────────────
 
-const inputCls = 'w-full bg-[#0f1117] border border-gray-700 rounded px-3 py-1.5 text-white text-sm focus:outline-none focus:border-blue-500';
+const inputCls = 'w-full bg-app-bg border border-app-line-muted rounded px-3 py-1.5 text-white text-sm focus:outline-none focus:border-blue-500';
 
 function Select({ options, value, onChange }: { options: string[]; value: string; onChange: (v: string) => void }) {
   return (

@@ -5,7 +5,7 @@ export function VacationHeader() {
   const remaining = getRemainingDays(currentUser.id);
 
   return (
-    <header className="bg-[#1a1d29] border-b border-gray-800 px-8 py-4">
+    <header className="bg-app-surface border-b border-app-line px-8 py-4">
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-semibold text-white">LeaveFlow Dashboard</h1>
@@ -13,7 +13,7 @@ export function VacationHeader() {
         </div>
 
         <div className="flex items-center gap-4">
-          <div className="bg-[#0f1117] border border-gray-700 rounded-lg px-4 py-2 flex items-center gap-3">
+          <div className="bg-app-bg border border-app-line-muted rounded-lg px-4 py-2 flex items-center gap-3">
             <span className="text-2xl">🏖️</span>
             <div>
               <p className="text-gray-400 text-xs">Remaining days</p>
@@ -23,7 +23,7 @@ export function VacationHeader() {
             </div>
           </div>
 
-          <div className="flex items-center gap-3 pl-4 border-l border-gray-700">
+          <div className="flex items-center gap-3 pl-4 border-l border-app-line-muted">
             <div className="text-right">
               <p className="text-white text-sm font-medium">{currentUser.name}</p>
               <p className="text-gray-400 text-xs">{currentUser.sector}</p>

@@ -47,18 +47,18 @@ export function VacationTimeline() {
   const isWeekend = (date: Date) => date.getDay() === 0 || date.getDay() === 6;
 
   return (
-    <div className="bg-[#1a1d29] border border-gray-800 rounded-xl p-6">
+    <div className="bg-app-surface border border-app-line rounded-xl p-6">
       <div className="flex items-center justify-between mb-6">
         <h3 className="text-white font-semibold text-lg">Vacation Timeline</h3>
         <div className="flex items-center gap-2">
-          <button onClick={() => setWeekOffset(weekOffset - 1)} className="p-2 rounded-lg bg-[#0f1117] border border-gray-700 hover:bg-gray-800 transition-colors">
+          <button onClick={() => setWeekOffset(weekOffset - 1)} className="p-2 rounded-lg bg-app-bg border border-app-line-muted hover:bg-app-hover transition-colors">
             <ChevronLeft className="w-4 h-4 text-gray-400" />
           </button>
           <span className="text-gray-400 text-sm px-3 min-w-[140px] text-center">
             {weekDates[0].toLocaleDateString('en-GB', { month: 'short', day: 'numeric' })} –{' '}
             {weekDates[6].toLocaleDateString('en-GB', { month: 'short', day: 'numeric', year: 'numeric' })}
           </span>
-          <button onClick={() => setWeekOffset(weekOffset + 1)} className="p-2 rounded-lg bg-[#0f1117] border border-gray-700 hover:bg-gray-800 transition-colors">
+          <button onClick={() => setWeekOffset(weekOffset + 1)} className="p-2 rounded-lg bg-app-bg border border-app-line-muted hover:bg-app-hover transition-colors">
             <ChevronRight className="w-4 h-4 text-gray-400" />
           </button>
           {weekOffset !== 0 && (
@@ -87,7 +87,7 @@ export function VacationTimeline() {
           <div className="space-y-2">
             {employees.map(emp => (
               <div key={emp.id} className="grid grid-cols-8 gap-2">
-                <div className="flex flex-col justify-center bg-[#0f1117] border border-gray-700 rounded-lg px-3 py-2">
+                <div className="flex flex-col justify-center bg-app-bg border border-app-line-muted rounded-lg px-3 py-2">
                   <div className="text-white text-sm font-medium truncate">{emp.name}</div>
                   <div className="text-gray-500 text-xs truncate">{emp.sector}</div>
                 </div>
@@ -104,7 +104,7 @@ export function VacationTimeline() {
                       onMouseEnter={() => req && setHoveredRequest(req.id)}
                       onMouseLeave={() => setHoveredRequest(null)}
                     >
-                      <div className={`h-14 rounded-lg border transition-all cursor-default ${weekend ? 'bg-gray-800/30 border-gray-800' : getCellStyle(req)}`}>
+                      <div className={`h-14 rounded-lg border transition-all cursor-default ${weekend ? 'bg-app-hover/30 border-app-line' : getCellStyle(req)}`}>
                         {req && !weekend && (
                           <div className="flex items-center justify-center h-full">
                             <div className={`w-2 h-2 rounded-full ${req.status === 'approved' ? 'bg-orange-500' : 'bg-blue-500'}`} />
@@ -113,14 +113,14 @@ export function VacationTimeline() {
                       </div>
 
                       {req && isHovered && (
-                        <div className={`absolute z-20 top-full mt-2 bg-gray-900 border border-gray-700 rounded-lg p-3 shadow-xl min-w-[200px] pointer-events-none ${idx >= 4 ? 'right-0' : 'left-1/2 -translate-x-1/2'}`}>
+                        <div className={`absolute z-20 top-full mt-2 bg-gray-900 border border-app-line-muted rounded-lg p-3 shadow-xl min-w-[200px] pointer-events-none ${idx >= 4 ? 'right-0' : 'left-1/2 -translate-x-1/2'}`}>
                           <div className="text-white text-sm font-medium mb-0.5">{req.employeeName}</div>
                           <div className="text-gray-400 text-xs mb-1">{req.sector}</div>
                           <div className="text-gray-300 text-xs">{req.daysCount} working days</div>
                           <div className={`text-xs mt-1 font-medium ${req.status === 'approved' ? 'text-orange-400' : 'text-blue-400'}`}>
                             {req.status === 'approved' ? 'On vacation' : 'Pending approval'}
                           </div>
-                          <div className="text-gray-500 text-xs mt-1 border-t border-gray-700 pt-1">
+                          <div className="text-gray-500 text-xs mt-1 border-t border-app-line-muted pt-1">
                             {req.startDate} → {req.endDate}
                           </div>
                         </div>
@@ -132,7 +132,7 @@ export function VacationTimeline() {
             ))}
           </div>
 
-          <div className="flex items-center gap-6 mt-6 pt-4 border-t border-gray-800">
+          <div className="flex items-center gap-6 mt-6 pt-4 border-t border-app-line">
             <div className="flex items-center gap-2">
               <div className="w-4 h-4 bg-green-500/10 border border-green-500/20 rounded" />
               <span className="text-gray-400 text-sm">Available</span>
@@ -146,7 +146,7 @@ export function VacationTimeline() {
               <span className="text-gray-400 text-sm">Pending Approval</span>
             </div>
             <div className="flex items-center gap-2">
-              <div className="w-4 h-4 bg-gray-800/30 border border-gray-800 rounded" />
+              <div className="w-4 h-4 bg-app-hover/30 border border-app-line rounded" />
               <span className="text-gray-400 text-sm">Weekend</span>
             </div>
           </div>

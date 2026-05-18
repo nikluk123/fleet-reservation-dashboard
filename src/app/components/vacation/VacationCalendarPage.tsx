@@ -46,18 +46,18 @@ export function VacationCalendarPage() {
 
   return (
     <div className="space-y-6">
-      <div className="bg-[#1a1d29] border border-gray-800 rounded-xl p-6">
+      <div className="bg-app-surface border border-app-line rounded-xl p-6">
         <div className="flex items-center justify-between mb-6">
           <h2 className="text-2xl font-semibold text-white flex items-center gap-3">
             <CalendarIcon className="w-7 h-7 text-green-400" />
             Leave Calendar
           </h2>
           <div className="flex items-center gap-3">
-            <button onClick={() => setMonthOffset(monthOffset - 1)} className="p-2 rounded-lg bg-[#0f1117] border border-gray-700 hover:bg-gray-800 transition-colors">
+            <button onClick={() => setMonthOffset(monthOffset - 1)} className="p-2 rounded-lg bg-app-bg border border-app-line-muted hover:bg-app-hover transition-colors">
               <ChevronLeft className="w-5 h-5 text-gray-400" />
             </button>
             <span className="text-white font-medium min-w-[180px] text-center capitalize">{monthName}</span>
-            <button onClick={() => setMonthOffset(monthOffset + 1)} className="p-2 rounded-lg bg-[#0f1117] border border-gray-700 hover:bg-gray-800 transition-colors">
+            <button onClick={() => setMonthOffset(monthOffset + 1)} className="p-2 rounded-lg bg-app-bg border border-app-line-muted hover:bg-app-hover transition-colors">
               <ChevronRight className="w-5 h-5 text-gray-400" />
             </button>
             {monthOffset !== 0 && (
@@ -87,8 +87,8 @@ export function VacationCalendarPage() {
                     : today
                     ? 'bg-green-500/10 border-green-500/50'
                     : weekend
-                    ? 'bg-gray-800/20 border-gray-800'
-                    : 'bg-[#0f1117] border-gray-700 hover:border-gray-600'
+                    ? 'bg-app-hover/20 border-app-line'
+                    : 'bg-app-bg border-app-line-muted hover:border-gray-600'
                 }`}
               >
                 {day && (
@@ -121,7 +121,7 @@ export function VacationCalendarPage() {
           })}
         </div>
 
-        <div className="flex items-center gap-6 mt-4 pt-4 border-t border-gray-800">
+        <div className="flex items-center gap-6 mt-4 pt-4 border-t border-app-line">
           <div className="flex items-center gap-2">
             <div className="w-4 h-3 bg-green-600/20 border border-green-600/40 rounded" />
             <span className="text-gray-400 text-xs">Approved</span>
@@ -133,14 +133,14 @@ export function VacationCalendarPage() {
         </div>
       </div>
 
-      <div className="bg-[#1a1d29] border border-gray-800 rounded-xl p-6">
+      <div className="bg-app-surface border border-app-line rounded-xl p-6">
         <h3 className="text-white font-semibold mb-4">Upcoming Approved Vacations</h3>
         {upcoming.length === 0 ? (
           <p className="text-gray-400 text-sm">No upcoming approved vacations.</p>
         ) : (
           <div className="space-y-3">
             {upcoming.map(req => (
-              <div key={req.id} className="bg-[#0f1117] border border-gray-700 rounded-lg p-4 flex items-center justify-between">
+              <div key={req.id} className="bg-app-bg border border-app-line-muted rounded-lg p-4 flex items-center justify-between">
                 <div className="flex items-center gap-4">
                   <div className="bg-green-500/10 p-3 rounded-lg">
                     <span className="text-xl">🏖️</span>

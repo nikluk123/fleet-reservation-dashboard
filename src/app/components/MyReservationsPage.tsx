@@ -53,7 +53,7 @@ export function MyReservationsPage({ reservations }: MyReservationsPageProps) {
     const isPending = reservation.status === 'pending';
 
     return (
-      <div className="bg-[#0f1117] border border-gray-700 rounded-lg p-6 hover:border-blue-500/30 transition-all">
+      <div className="bg-app-bg border border-app-line-muted rounded-lg p-6 hover:border-blue-500/30 transition-all">
         <div className="flex items-start justify-between mb-4">
           <div className="flex items-center gap-3">
             <div className="bg-blue-500/10 p-3 rounded-lg">
@@ -107,7 +107,7 @@ export function MyReservationsPage({ reservations }: MyReservationsPageProps) {
         )}
 
         {reservation.approvedBy && (
-          <div className="pt-3 border-t border-gray-700">
+          <div className="pt-3 border-t border-app-line-muted">
             <p className="text-gray-400 text-sm">
               Approved by <span className="text-white">{reservation.approvedBy}</span>
               {reservation.approvedAt && (
@@ -122,7 +122,7 @@ export function MyReservationsPage({ reservations }: MyReservationsPageProps) {
 
   const Section = ({ title, items }: { title: string; items: Reservation[] }) => (
     items.length > 0 ? (
-      <div className="bg-[#1a1d29] border border-gray-800 rounded-xl p-6">
+      <div className="bg-app-surface border border-app-line rounded-xl p-6">
         <h3 className="text-white font-semibold text-lg mb-4">{title}</h3>
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
           {items.map(res => <ReservationCard key={res.id} reservation={res} />)}
@@ -133,14 +133,14 @@ export function MyReservationsPage({ reservations }: MyReservationsPageProps) {
 
   return (
     <div className="space-y-6">
-      <div className="bg-[#1a1d29] border border-gray-800 rounded-xl p-6">
+      <div className="bg-app-surface border border-app-line rounded-xl p-6">
         <h2 className="text-2xl font-semibold text-white mb-1">My Reservations</h2>
         <p className="text-gray-400">Your vehicle reservation history and pending requests</p>
       </div>
 
       {/* Stats */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div className="bg-[#1a1d29] border border-gray-800 rounded-xl p-6">
+        <div className="bg-app-surface border border-app-line rounded-xl p-6">
           <div className="flex items-center gap-3 mb-2">
             <div className="bg-green-500/10 p-2 rounded-lg">
               <CheckCircle className="w-5 h-5 text-green-500" />
@@ -149,7 +149,7 @@ export function MyReservationsPage({ reservations }: MyReservationsPageProps) {
           </div>
           <p className="text-3xl font-bold text-white">{activeReservations.length}</p>
         </div>
-        <div className="bg-[#1a1d29] border border-gray-800 rounded-xl p-6">
+        <div className="bg-app-surface border border-app-line rounded-xl p-6">
           <div className="flex items-center gap-3 mb-2">
             <div className="bg-orange-500/10 p-2 rounded-lg">
               <Clock className="w-5 h-5 text-orange-500" />
@@ -158,7 +158,7 @@ export function MyReservationsPage({ reservations }: MyReservationsPageProps) {
           </div>
           <p className="text-3xl font-bold text-white">{pendingReservations.length}</p>
         </div>
-        <div className="bg-[#1a1d29] border border-gray-800 rounded-xl p-6">
+        <div className="bg-app-surface border border-app-line rounded-xl p-6">
           <div className="flex items-center gap-3 mb-2">
             <div className="bg-blue-500/10 p-2 rounded-lg">
               <Calendar className="w-5 h-5 text-blue-500" />
@@ -174,7 +174,7 @@ export function MyReservationsPage({ reservations }: MyReservationsPageProps) {
       <Section title="Past & Rejected" items={pastReservations} />
 
       {myReservations.length === 0 && (
-        <div className="bg-[#1a1d29] border border-gray-800 rounded-xl p-12 text-center">
+        <div className="bg-app-surface border border-app-line rounded-xl p-12 text-center">
           <Calendar className="w-16 h-16 text-gray-600 mx-auto mb-4" />
           <h3 className="text-white font-semibold text-lg mb-2">No Reservations Yet</h3>
           <p className="text-gray-400">You haven't made any vehicle reservations yet. Go to the Dashboard to create one.</p>

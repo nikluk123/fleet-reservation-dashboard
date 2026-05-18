@@ -48,7 +48,7 @@ export function CalendarPage({ reservations }: CalendarPageProps) {
 
   return (
     <div className="space-y-6">
-      <div className="bg-[#1a1d29] border border-gray-800 rounded-xl p-6">
+      <div className="bg-app-surface border border-app-line rounded-xl p-6">
         <div className="flex items-center justify-between mb-6">
           <h2 className="text-2xl font-semibold text-white flex items-center gap-3">
             <CalendarIcon className="w-7 h-7" />
@@ -57,14 +57,14 @@ export function CalendarPage({ reservations }: CalendarPageProps) {
           <div className="flex items-center gap-3">
             <button
               onClick={() => setMonthOffset(monthOffset - 1)}
-              className="p-2 rounded-lg bg-[#0f1117] border border-gray-700 hover:bg-gray-800 transition-colors"
+              className="p-2 rounded-lg bg-app-bg border border-app-line-muted hover:bg-app-hover transition-colors"
             >
               <ChevronLeft className="w-5 h-5 text-gray-400" />
             </button>
             <span className="text-white font-medium min-w-[180px] text-center">{monthName}</span>
             <button
               onClick={() => setMonthOffset(monthOffset + 1)}
-              className="p-2 rounded-lg bg-[#0f1117] border border-gray-700 hover:bg-gray-800 transition-colors"
+              className="p-2 rounded-lg bg-app-bg border border-app-line-muted hover:bg-app-hover transition-colors"
             >
               <ChevronRight className="w-5 h-5 text-gray-400" />
             </button>
@@ -94,7 +94,7 @@ export function CalendarPage({ reservations }: CalendarPageProps) {
                   day
                     ? today
                       ? 'bg-blue-500/10 border-blue-500/50'
-                      : 'bg-[#0f1117] border-gray-700 hover:border-gray-600'
+                      : 'bg-app-bg border-app-line-muted hover:border-gray-600'
                     : 'border-transparent'
                 }`}
               >
@@ -133,7 +133,7 @@ export function CalendarPage({ reservations }: CalendarPageProps) {
         </div>
       </div>
 
-      <div className="bg-[#1a1d29] border border-gray-800 rounded-xl p-6">
+      <div className="bg-app-surface border border-app-line rounded-xl p-6">
         <h3 className="text-white font-semibold mb-4">Upcoming Reservations</h3>
         {upcomingReservations.length === 0 ? (
           <p className="text-gray-400 text-sm">No upcoming approved reservations.</p>
@@ -142,7 +142,7 @@ export function CalendarPage({ reservations }: CalendarPageProps) {
             {upcomingReservations.map((res) => {
               const vehicle = vehicles.find(v => v.id === res.vehicleId);
               return (
-                <div key={res.id} className="bg-[#0f1117] border border-gray-700 rounded-lg p-4 flex items-center justify-between">
+                <div key={res.id} className="bg-app-bg border border-app-line-muted rounded-lg p-4 flex items-center justify-between">
                   <div className="flex items-center gap-4">
                     <div className="bg-blue-500/10 p-3 rounded-lg">
                       <CalendarIcon className="w-5 h-5 text-blue-500" />

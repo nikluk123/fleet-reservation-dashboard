@@ -43,7 +43,7 @@ export function Header({ searchQuery, setSearchQuery }: HeaderProps) {
   };
 
   return (
-    <header className="bg-[#1a1d29] border-b border-gray-800 px-8 py-4">
+    <header className="bg-app-surface border-b border-app-line px-8 py-4">
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-semibold text-white">FleetFlow Dashboard</h1>
@@ -58,7 +58,7 @@ export function Header({ searchQuery, setSearchQuery }: HeaderProps) {
               placeholder="Search vehicles, plates, bookers..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="bg-[#0f1117] border border-gray-700 rounded-lg pl-10 pr-4 py-2 text-white placeholder-gray-500 w-80 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"
+              className="bg-app-bg border border-app-line-muted rounded-lg pl-10 pr-4 py-2 text-white placeholder-gray-500 w-80 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"
             />
             {searchQuery && (
               <button
@@ -73,7 +73,7 @@ export function Header({ searchQuery, setSearchQuery }: HeaderProps) {
           <div className="relative">
             <button 
               onClick={() => setShowNotifications(!showNotifications)}
-              className="relative p-2 rounded-lg bg-[#0f1117] border border-gray-700 hover:bg-gray-800 transition-colors"
+              className="relative p-2 rounded-lg bg-app-bg border border-app-line-muted hover:bg-app-hover transition-colors"
             >
               <Bell className="w-5 h-5 text-gray-400" />
               {activities.length > 0 && (
@@ -88,8 +88,8 @@ export function Header({ searchQuery, setSearchQuery }: HeaderProps) {
                   className="fixed inset-0 z-10" 
                   onClick={() => setShowNotifications(false)}
                 />
-                <div className="absolute right-0 top-full mt-2 w-96 bg-[#1a1d29] border border-gray-800 rounded-lg shadow-2xl z-20 max-h-[500px] overflow-y-auto">
-                  <div className="p-4 border-b border-gray-800">
+                <div className="absolute right-0 top-full mt-2 w-96 bg-app-surface border border-app-line rounded-lg shadow-2xl z-20 max-h-[500px] overflow-y-auto">
+                  <div className="p-4 border-b border-app-line">
                     <h3 className="text-white font-semibold">Recent Activity</h3>
                     <p className="text-gray-400 text-sm">Last 10 events</p>
                   </div>
@@ -97,7 +97,7 @@ export function Header({ searchQuery, setSearchQuery }: HeaderProps) {
                   {activities.length > 0 ? (
                     <div className="divide-y divide-gray-800">
                       {activities.map((activity) => (
-                        <div key={activity.id} className="p-4 hover:bg-gray-800/30 transition-colors">
+                        <div key={activity.id} className="p-4 hover:bg-app-hover/30 transition-colors">
                           <div className="flex items-start gap-3">
                             <span className="text-2xl">{getActivityIcon(activity.type)}</span>
                             <div className="flex-1 min-w-0">
@@ -123,7 +123,7 @@ export function Header({ searchQuery, setSearchQuery }: HeaderProps) {
             )}
           </div>
           
-          <div className="flex items-center gap-3 pl-6 border-l border-gray-700">
+          <div className="flex items-center gap-3 pl-6 border-l border-app-line-muted">
             <div className="text-right">
               <p className="text-white text-sm font-medium">{currentUser.name}</p>
               <p className="text-gray-400 text-xs capitalize">{currentUser.role}</p>

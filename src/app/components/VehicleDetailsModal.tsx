@@ -61,16 +61,16 @@ export function VehicleDetailsModal({ isOpen, onClose, vehicle, dateRange }: Veh
 
   return (
     <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-      <div className="bg-[#1a1d29] border border-gray-800 rounded-2xl max-w-3xl w-full max-h-[90vh] overflow-y-auto">
+      <div className="bg-app-surface border border-app-line rounded-2xl max-w-3xl w-full max-h-[90vh] overflow-y-auto">
         {/* Header */}
-        <div className="flex items-center justify-between p-6 border-b border-gray-800">
+        <div className="flex items-center justify-between p-6 border-b border-app-line">
           <div>
             <h2 className="text-2xl font-semibold text-white mb-1">{vehicle.model}</h2>
             <p className="text-gray-400 font-mono">{vehicle.plate}</p>
           </div>
           <button
             onClick={onClose}
-            className="p-2 rounded-lg hover:bg-gray-800 transition-colors"
+            className="p-2 rounded-lg hover:bg-app-hover transition-colors"
           >
             <X className="w-5 h-5 text-gray-400" />
           </button>
@@ -80,7 +80,7 @@ export function VehicleDetailsModal({ isOpen, onClose, vehicle, dateRange }: Veh
         <div className="p-6 space-y-6">
           {/* Vehicle Info */}
           <div className="grid grid-cols-2 gap-6">
-            <div className="bg-[#0f1117] border border-gray-700 rounded-lg p-4">
+            <div className="bg-app-bg border border-app-line-muted rounded-lg p-4">
               <div className="flex items-center gap-3 mb-3">
                 <div className="bg-blue-500/10 p-2 rounded-lg">
                   <Calendar className="w-5 h-5 text-blue-500" />
@@ -92,7 +92,7 @@ export function VehicleDetailsModal({ isOpen, onClose, vehicle, dateRange }: Veh
               </div>
             </div>
 
-            <div className="bg-[#0f1117] border border-gray-700 rounded-lg p-4">
+            <div className="bg-app-bg border border-app-line-muted rounded-lg p-4">
               <div className="flex items-center gap-3 mb-3">
                 <div className="bg-purple-500/10 p-2 rounded-lg">
                   <MapPin className="w-5 h-5 text-purple-500" />
@@ -104,7 +104,7 @@ export function VehicleDetailsModal({ isOpen, onClose, vehicle, dateRange }: Veh
               </div>
             </div>
 
-            <div className="bg-[#0f1117] border border-gray-700 rounded-lg p-4">
+            <div className="bg-app-bg border border-app-line-muted rounded-lg p-4">
               <div className="flex items-center gap-3 mb-3">
                 <div className="bg-orange-500/10 p-2 rounded-lg">
                   <Car className="w-5 h-5 text-orange-500" />  {/* Sad koristimo lucide Car ikonu */}
@@ -117,7 +117,7 @@ export function VehicleDetailsModal({ isOpen, onClose, vehicle, dateRange }: Veh
             </div>
 
             {vehicle.lastUser && (
-              <div className="bg-[#0f1117] border border-gray-700 rounded-lg p-4">
+              <div className="bg-app-bg border border-app-line-muted rounded-lg p-4">
                 <div className="flex items-center gap-3 mb-3">
                   <div className="bg-green-500/10 p-2 rounded-lg">
                     <User className="w-5 h-5 text-green-500" />
@@ -132,7 +132,7 @@ export function VehicleDetailsModal({ isOpen, onClose, vehicle, dateRange }: Veh
           </div>
 
           {/* Date Range Status */}
-          <div className="border-t border-gray-800 pt-6">
+          <div className="border-t border-app-line pt-6">
             <h3 className="text-white font-semibold mb-4">
               Status za {new Date(dateRange.start).toLocaleDateString('sr-RS')} - {new Date(dateRange.end).toLocaleDateString('sr-RS')}
             </h3>
@@ -158,7 +158,7 @@ export function VehicleDetailsModal({ isOpen, onClose, vehicle, dateRange }: Veh
                 {/* Booking Details */}
                 <div className="space-y-3">
                   {vehicleReservations.map((reservation) => (
-                    <div key={reservation.id} className="bg-[#0f1117] border border-gray-700 rounded-lg p-4">
+                    <div key={reservation.id} className="bg-app-bg border border-app-line-muted rounded-lg p-4">
                       <div className="flex items-start justify-between mb-3">
                         <div>
                           <p className="text-white font-medium mb-1">{reservation.bookerName}</p>
@@ -184,7 +184,7 @@ export function VehicleDetailsModal({ isOpen, onClose, vehicle, dateRange }: Veh
                       </div>
 
                       {reservation.approvedBy && (
-                        <div className="pt-3 border-t border-gray-700">
+                        <div className="pt-3 border-t border-app-line-muted">
                           <p className="text-gray-400 text-sm">
                             Odobrio: <span className="text-white">{reservation.approvedBy}</span>
                             {reservation.approvedAt && (
@@ -195,7 +195,7 @@ export function VehicleDetailsModal({ isOpen, onClose, vehicle, dateRange }: Veh
                       )}
 
                       {reservation.notes && (
-                        <div className="pt-3 border-t border-gray-700 mt-3">
+                        <div className="pt-3 border-t border-app-line-muted mt-3">
                           <p className="text-gray-500 text-sm">Napomene:</p>
                           <p className="text-gray-300 text-sm mt-1">{reservation.notes}</p>
                         </div>

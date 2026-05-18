@@ -26,8 +26,8 @@ export function VacationSidebar({ activeView, setActiveView, onSwitchToFleet, on
     : 'Employee';
 
   return (
-    <aside className="w-64 bg-[#1a1d29] border-r border-gray-800 flex flex-col">
-      <div className="p-6 border-b border-gray-800">
+    <aside className="w-64 bg-app-surface border-r border-app-line flex flex-col">
+      <div className="p-6 border-b border-app-line">
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 bg-gradient-to-br from-green-500 to-emerald-700 rounded-lg flex items-center justify-center">
             <Palmtree className="w-6 h-6 text-white" />
@@ -39,8 +39,8 @@ export function VacationSidebar({ activeView, setActiveView, onSwitchToFleet, on
         </div>
       </div>
 
-      <div className="p-4 border-b border-gray-800">
-        <div className="flex items-center gap-3 p-3 bg-[#0f1117] rounded-lg border border-gray-700">
+      <div className="p-4 border-b border-app-line">
+        <div className="flex items-center gap-3 p-3 bg-app-bg rounded-lg border border-app-line-muted">
           <div className="w-10 h-10 bg-gradient-to-br from-green-500 to-emerald-700 rounded-full flex items-center justify-center flex-shrink-0">
             <span className="text-white font-semibold text-sm">
               {currentUser.name.split(' ').map(n => n[0]).join('')}
@@ -65,7 +65,7 @@ export function VacationSidebar({ activeView, setActiveView, onSwitchToFleet, on
                   className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-all ${
                     isActive
                       ? 'bg-green-600 text-white shadow-lg shadow-green-600/20'
-                      : 'text-gray-400 hover:bg-gray-800/50 hover:text-white'
+                      : 'text-gray-400 hover:bg-app-hover hover:text-white'
                   }`}
                 >
                   <Icon className="w-5 h-5" />
@@ -77,7 +77,7 @@ export function VacationSidebar({ activeView, setActiveView, onSwitchToFleet, on
         </ul>
       </nav>
 
-      <div className="p-4 border-t border-gray-800 space-y-1">
+      <div className="p-4 border-t border-app-line space-y-1">
         <button
           onClick={onSwitchToFleet}
           className="w-full flex items-center gap-3 px-4 py-3 rounded-lg text-gray-400 hover:bg-blue-500/10 hover:text-blue-400 transition-all text-sm"
@@ -87,7 +87,7 @@ export function VacationSidebar({ activeView, setActiveView, onSwitchToFleet, on
         </button>
         <button
           onClick={onSettingsClick}
-          className="w-full flex items-center gap-3 px-4 py-3 rounded-lg text-gray-400 hover:bg-gray-800/50 hover:text-white transition-all"
+          className="w-full flex items-center gap-3 px-4 py-3 rounded-lg text-gray-400 hover:bg-app-hover hover:text-white transition-all"
         >
           <Settings className="w-5 h-5" />
           <span className="font-medium">Settings</span>

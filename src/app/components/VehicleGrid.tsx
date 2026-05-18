@@ -23,7 +23,7 @@ export function VehicleGrid({ vehicles, onSelectVehicle }: VehicleGridProps) {
   };
 
   return (
-    <div className="bg-[#1a1d29] border border-gray-800 rounded-xl p-6">
+    <div className="bg-app-surface border border-app-line rounded-xl p-6">
       <div className="flex items-center justify-between mb-6">
         <h3 className="text-white font-semibold text-lg">Fleet Overview</h3>
         <span className="text-gray-400 text-sm">{vehicles.length} vehicles</span>
@@ -41,7 +41,7 @@ export function VehicleGrid({ vehicles, onSelectVehicle }: VehicleGridProps) {
           return (
             <div
               key={vehicle.id}
-              className="bg-[#0f1117] border border-gray-700 rounded-xl p-4 hover:border-blue-500 transition-all cursor-pointer group"
+              className="bg-app-bg border border-app-line-muted rounded-xl p-4 hover:border-blue-500 transition-all cursor-pointer group"
               onClick={() => onSelectVehicle(vehicle)}
             >
               <div className="bg-gradient-to-br from-gray-800 to-gray-900 rounded-lg h-32 mb-4 flex items-center justify-center">
@@ -81,7 +81,7 @@ export function VehicleGrid({ vehicles, onSelectVehicle }: VehicleGridProps) {
                 )}
               </div>
 
-              <div className="mt-4 pt-4 border-t border-gray-700 opacity-0 group-hover:opacity-100 transition-opacity">
+              <div className="mt-4 pt-4 border-t border-app-line-muted opacity-0 group-hover:opacity-100 transition-opacity">
                 <button className="w-full bg-blue-600 hover:bg-blue-700 text-white text-sm py-2 rounded-lg transition-colors">
                   View Details
                 </button>

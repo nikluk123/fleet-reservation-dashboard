@@ -86,10 +86,10 @@ export function VacationRequestModal({ isOpen, onClose }: Props) {
 
   return (
     <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-      <div className="bg-[#1a1d29] border border-gray-800 rounded-2xl max-w-lg w-full">
-        <div className="flex items-center justify-between p-6 border-b border-gray-800">
+      <div className="bg-app-surface border border-app-line rounded-2xl max-w-lg w-full">
+        <div className="flex items-center justify-between p-6 border-b border-app-line">
           <h2 className="text-2xl font-semibold text-white">New Vacation Request</h2>
-          <button onClick={onClose} className="p-2 rounded-lg hover:bg-gray-800 transition-colors">
+          <button onClick={onClose} className="p-2 rounded-lg hover:bg-app-hover transition-colors">
             <X className="w-5 h-5 text-gray-400" />
           </button>
         </div>
@@ -108,19 +108,19 @@ export function VacationRequestModal({ isOpen, onClose }: Props) {
                     onChange={e => { setEmployeeSearch(e.target.value); setShowDropdown(true); }}
                     onFocus={() => setShowDropdown(true)}
                     placeholder="Search employees..."
-                    className="w-full bg-[#0f1117] border border-gray-700 rounded-lg pl-10 pr-4 py-2.5 text-white focus:outline-none focus:border-green-500 focus:ring-2 focus:ring-green-500/20"
+                    className="w-full bg-app-bg border border-app-line-muted rounded-lg pl-10 pr-4 py-2.5 text-white focus:outline-none focus:border-green-500 focus:ring-2 focus:ring-green-500/20"
                   />
                 </div>
                 {showDropdown && filteredEmployees.length > 0 && (
                   <>
                     <div className="fixed inset-0 z-10" onClick={() => setShowDropdown(false)} />
-                    <div className="absolute z-20 w-full mt-1 bg-[#1a1d29] border border-gray-700 rounded-lg shadow-xl max-h-52 overflow-y-auto">
+                    <div className="absolute z-20 w-full mt-1 bg-app-surface border border-app-line-muted rounded-lg shadow-xl max-h-52 overflow-y-auto">
                       {filteredEmployees.map(emp => (
                         <button
                           key={emp.id}
                           type="button"
                           onClick={() => handleEmployeeSelect(emp)}
-                          className="w-full text-left px-4 py-3 hover:bg-gray-800 transition-colors border-b border-gray-800 last:border-b-0"
+                          className="w-full text-left px-4 py-3 hover:bg-app-hover transition-colors border-b border-app-line last:border-b-0"
                         >
                           <div className="text-white font-medium">{emp.name}</div>
                           <div className="text-gray-400 text-xs">{emp.sector} · {getRemainingDays(emp.id)} days remaining</div>
@@ -131,14 +131,14 @@ export function VacationRequestModal({ isOpen, onClose }: Props) {
                 )}
               </>
             ) : (
-              <div className="w-full bg-gray-800/50 border border-gray-700 rounded-lg px-4 py-2.5 text-gray-400 cursor-not-allowed">
+              <div className="w-full bg-gray-800/50 border border-app-line-muted rounded-lg px-4 py-2.5 text-gray-400 cursor-not-allowed">
                 {currentUser.name}
               </div>
             )}
           </div>
 
           {/* Remaining days info */}
-          <div className="bg-[#0f1117] border border-gray-700 rounded-lg px-4 py-3 flex items-center justify-between">
+          <div className="bg-app-bg border border-app-line-muted rounded-lg px-4 py-3 flex items-center justify-between">
             <span className="text-gray-400 text-sm">
               {isAdmin && selectedEmployee.id !== currentUser.id
                 ? `${selectedEmployee.name}'s available days`
@@ -158,7 +158,7 @@ export function VacationRequestModal({ isOpen, onClose }: Props) {
                 min={today}
                 onChange={e => { setStartDate(e.target.value); if (endDate && e.target.value > endDate) setEndDate(e.target.value); }}
                 required
-                className="w-full bg-[#0f1117] border border-gray-700 rounded-lg px-4 py-2.5 text-white focus:outline-none focus:border-green-500 focus:ring-2 focus:ring-green-500/20"
+                className="w-full bg-app-bg border border-app-line-muted rounded-lg px-4 py-2.5 text-white focus:outline-none focus:border-green-500 focus:ring-2 focus:ring-green-500/20"
               />
             </div>
             <div>
@@ -169,13 +169,13 @@ export function VacationRequestModal({ isOpen, onClose }: Props) {
                 min={startDate || today}
                 onChange={e => setEndDate(e.target.value)}
                 required
-                className="w-full bg-[#0f1117] border border-gray-700 rounded-lg px-4 py-2.5 text-white focus:outline-none focus:border-green-500 focus:ring-2 focus:ring-green-500/20"
+                className="w-full bg-app-bg border border-app-line-muted rounded-lg px-4 py-2.5 text-white focus:outline-none focus:border-green-500 focus:ring-2 focus:ring-green-500/20"
               />
             </div>
           </div>
 
           {daysCount > 0 && (
-            <div className="bg-[#0f1117] border border-gray-700 rounded-lg px-4 py-3 flex items-center justify-between">
+            <div className="bg-app-bg border border-app-line-muted rounded-lg px-4 py-3 flex items-center justify-between">
               <span className="text-gray-400 text-sm">Working days requested</span>
               <span className="text-white font-semibold">{daysCount} days</span>
             </div>
@@ -215,12 +215,12 @@ export function VacationRequestModal({ isOpen, onClose }: Props) {
               onChange={e => setNotes(e.target.value)}
               rows={3}
               placeholder="Additional information..."
-              className="w-full bg-[#0f1117] border border-gray-700 rounded-lg px-4 py-2.5 text-white focus:outline-none focus:border-green-500 focus:ring-2 focus:ring-green-500/20 resize-none"
+              className="w-full bg-app-bg border border-app-line-muted rounded-lg px-4 py-2.5 text-white focus:outline-none focus:border-green-500 focus:ring-2 focus:ring-green-500/20 resize-none"
             />
           </div>
 
-          <div className="flex items-center justify-end gap-3 pt-4 border-t border-gray-800">
-            <button type="button" onClick={onClose} className="px-6 py-2.5 border border-gray-700 rounded-lg text-gray-400 hover:bg-gray-800 transition-colors">
+          <div className="flex items-center justify-end gap-3 pt-4 border-t border-app-line">
+            <button type="button" onClick={onClose} className="px-6 py-2.5 border border-app-line-muted rounded-lg text-gray-400 hover:bg-app-hover transition-colors">
               Cancel
             </button>
             <button

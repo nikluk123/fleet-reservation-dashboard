@@ -294,7 +294,7 @@ export function VacationProvider({ initialUser, onLogout, children }: Props) {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-[#0f1117] flex items-center justify-center">
+      <div className="min-h-screen bg-app-bg flex items-center justify-center">
         <div className="w-10 h-10 border-2 border-green-500/30 border-t-green-500 rounded-full animate-spin" />
       </div>
     );
@@ -302,7 +302,7 @@ export function VacationProvider({ initialUser, onLogout, children }: Props) {
 
   if (loadError) {
     return (
-      <div className="min-h-screen bg-[#0f1117] flex items-center justify-center">
+      <div className="min-h-screen bg-app-bg flex items-center justify-center">
         <div className="bg-red-500/10 border border-red-500/30 rounded-xl p-8 max-w-md text-center">
           <p className="text-red-400 font-semibold mb-2">Failed to load data</p>
           <p className="text-gray-400 text-sm">{loadError}</p>

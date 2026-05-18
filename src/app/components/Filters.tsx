@@ -107,7 +107,7 @@ export function Filters({
 
   return (
     <div className="space-y-6">
-      <div className="bg-[#1a1d29] border border-gray-800 rounded-xl p-6 space-y-4">
+      <div className="bg-app-surface border border-app-line rounded-xl p-6 space-y-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <Filter className="w-5 h-5 text-blue-500" />
@@ -117,7 +117,7 @@ export function Filters({
             {filtersApplied && (
               <button
                 onClick={onClearFilters}
-                className="px-4 py-2 text-gray-400 hover:text-white border border-gray-700 rounded-lg hover:bg-gray-800 transition-colors text-sm"
+                className="px-4 py-2 text-gray-400 hover:text-white border border-app-line-muted rounded-lg hover:bg-app-hover transition-colors text-sm"
               >
                 Clear Filters
               </button>
@@ -133,7 +133,7 @@ export function Filters({
 
         {/* Active Filters Chips */}
         {filtersApplied && activeFilters.length > 0 && (
-          <div className="flex items-center gap-2 flex-wrap pb-2 border-b border-gray-800">
+          <div className="flex items-center gap-2 flex-wrap pb-2 border-b border-app-line">
             <span className="text-gray-400 text-sm">Active:</span>
             {activeFilters.map((filter) => (
               <div
@@ -162,7 +162,7 @@ export function Filters({
             <select
               value={selectedDepartment}
               onChange={(e) => setSelectedDepartment(e.target.value)}
-              className="w-full bg-[#0f1117] border border-gray-700 rounded-lg px-4 py-2.5 text-white focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"
+              className="w-full bg-app-bg border border-app-line-muted rounded-lg px-4 py-2.5 text-white focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"
             >
               <option value="all">All Departments</option>
               {departments.filter(d => !d.parent).map(dept => (
@@ -186,7 +186,7 @@ export function Filters({
             <select
               value={selectedVehicleType}
               onChange={(e) => setSelectedVehicleType(e.target.value)}
-              className="w-full bg-[#0f1117] border border-gray-700 rounded-lg px-4 py-2.5 text-white focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"
+              className="w-full bg-app-bg border border-app-line-muted rounded-lg px-4 py-2.5 text-white focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"
             >
               {vehicleTypes.map(type => (
                 <option key={type} value={type}>{type}</option>
@@ -200,7 +200,7 @@ export function Filters({
             <select
               value={selectedProject}
               onChange={(e) => setSelectedProject(e.target.value)}
-              className="w-full bg-[#0f1117] border border-gray-700 rounded-lg px-4 py-2.5 text-white focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"
+              className="w-full bg-app-bg border border-app-line-muted rounded-lg px-4 py-2.5 text-white focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"
             >
               <option value="All Projects">All Projects</option>
               {projects.map(project => (
@@ -220,13 +220,13 @@ export function Filters({
                 type="date"
                 value={dateRange.start}
                 onChange={(e) => setDateRange({ ...dateRange, start: e.target.value })}
-                className="flex-1 bg-[#0f1117] border border-gray-700 rounded-lg px-3 py-2.5 text-white text-sm focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"
+                className="flex-1 bg-app-bg border border-app-line-muted rounded-lg px-3 py-2.5 text-white text-sm focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"
               />
               <input
                 type="date"
                 value={dateRange.end}
                 onChange={(e) => setDateRange({ ...dateRange, end: e.target.value })}
-                className="flex-1 bg-[#0f1117] border border-gray-700 rounded-lg px-3 py-2.5 text-white text-sm focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"
+                className="flex-1 bg-app-bg border border-app-line-muted rounded-lg px-3 py-2.5 text-white text-sm focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"
               />
             </div>
           </div>

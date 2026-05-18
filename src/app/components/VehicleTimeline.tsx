@@ -52,13 +52,13 @@ export function VehicleTimeline({ vehicles, reservations }: VehicleTimelineProps
   };
 
   return (
-    <div className="bg-[#1a1d29] border border-gray-800 rounded-xl p-6">
+    <div className="bg-app-surface border border-app-line rounded-xl p-6">
       <div className="flex items-center justify-between mb-6">
         <h3 className="text-white font-semibold text-lg">Vehicle Availability Timeline</h3>
         <div className="flex items-center gap-2">
           <button
             onClick={() => setWeekOffset(weekOffset - 1)}
-            className="p-2 rounded-lg bg-[#0f1117] border border-gray-700 hover:bg-gray-800 transition-colors"
+            className="p-2 rounded-lg bg-app-bg border border-app-line-muted hover:bg-app-hover transition-colors"
           >
             <ChevronLeft className="w-4 h-4 text-gray-400" />
           </button>
@@ -68,7 +68,7 @@ export function VehicleTimeline({ vehicles, reservations }: VehicleTimelineProps
           </span>
           <button
             onClick={() => setWeekOffset(weekOffset + 1)}
-            className="p-2 rounded-lg bg-[#0f1117] border border-gray-700 hover:bg-gray-800 transition-colors"
+            className="p-2 rounded-lg bg-app-bg border border-app-line-muted hover:bg-app-hover transition-colors"
           >
             <ChevronRight className="w-4 h-4 text-gray-400" />
           </button>
@@ -103,7 +103,7 @@ export function VehicleTimeline({ vehicles, reservations }: VehicleTimelineProps
           <div className="space-y-2">
             {vehicles.map((vehicle) => (
               <div key={vehicle.id} className="grid grid-cols-8 gap-2">
-                <div className="flex flex-col justify-center bg-[#0f1117] border border-gray-700 rounded-lg px-3 py-2">
+                <div className="flex flex-col justify-center bg-app-bg border border-app-line-muted rounded-lg px-3 py-2">
                   <div className="text-white text-sm font-medium truncate">{vehicle.model}</div>
                   <div className="text-gray-400 text-xs truncate font-mono">{vehicle.plate}</div>
                 </div>
@@ -128,7 +128,7 @@ export function VehicleTimeline({ vehicles, reservations }: VehicleTimelineProps
                       </div>
 
                       {reservation && isHovered && (
-                        <div className={`absolute z-20 top-full mt-2 bg-gray-900 border border-gray-700 rounded-lg p-3 shadow-xl min-w-[210px] pointer-events-none ${idx >= 4 ? 'right-0' : 'left-1/2 -translate-x-1/2'}`}>
+                        <div className={`absolute z-20 top-full mt-2 bg-gray-900 border border-app-line-muted rounded-lg p-3 shadow-xl min-w-[210px] pointer-events-none ${idx >= 4 ? 'right-0' : 'left-1/2 -translate-x-1/2'}`}>
                           <div className="text-white text-sm font-medium mb-0.5">{reservation.bookerName}</div>
                           <div className="text-gray-400 text-xs mb-0.5">{reservation.sector}</div>
                           {reservation.project && (
@@ -137,7 +137,7 @@ export function VehicleTimeline({ vehicles, reservations }: VehicleTimelineProps
                           <div className={`text-xs mt-1 font-medium ${reservation.status === 'approved' ? 'text-red-400' : 'text-orange-400'}`}>
                             {reservation.status === 'approved' ? 'Approved' : 'Pending approval'}
                           </div>
-                          <div className="text-gray-500 text-xs mt-1 border-t border-gray-700 pt-1">
+                          <div className="text-gray-500 text-xs mt-1 border-t border-app-line-muted pt-1">
                             {new Date(reservation.startDate).toLocaleDateString('en-GB')} – {new Date(reservation.endDate).toLocaleDateString('en-GB')}
                           </div>
                         </div>
@@ -150,7 +150,7 @@ export function VehicleTimeline({ vehicles, reservations }: VehicleTimelineProps
           </div>
 
           {/* Legend */}
-          <div className="flex items-center gap-6 mt-6 pt-4 border-t border-gray-800">
+          <div className="flex items-center gap-6 mt-6 pt-4 border-t border-app-line">
             <div className="flex items-center gap-2">
               <div className="w-4 h-4 bg-green-500/10 border border-green-500/20 rounded" />
               <span className="text-gray-400 text-sm">Available</span>

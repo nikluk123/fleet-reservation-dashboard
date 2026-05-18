@@ -66,7 +66,7 @@ export function LoginPage({ onLogin, initialPlatform = 'fleet' }: LoginPageProps
   const accentBorder = isFleet ? 'focus:border-blue-500' : 'focus:border-green-500';
 
   return (
-    <div className="min-h-screen bg-[#0f1117] flex items-center justify-center p-4">
+    <div className="min-h-screen bg-app-bg flex items-center justify-center p-4">
       <div className="w-full max-w-md">
 
         {/* Platform selector */}
@@ -76,7 +76,7 @@ export function LoginPage({ onLogin, initialPlatform = 'fleet' }: LoginPageProps
             className={`flex flex-col items-center gap-2 p-5 rounded-2xl border-2 transition-all ${
               isFleet
                 ? 'bg-blue-600/10 border-blue-500 shadow-lg shadow-blue-500/20'
-                : 'bg-[#1a1d29] border-gray-700 hover:border-gray-600'
+                : 'bg-app-surface border-app-line-muted hover:border-gray-600'
             }`}
           >
             <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${isFleet ? 'bg-blue-600' : 'bg-gray-700'}`}>
@@ -91,7 +91,7 @@ export function LoginPage({ onLogin, initialPlatform = 'fleet' }: LoginPageProps
             className={`flex flex-col items-center gap-2 p-5 rounded-2xl border-2 transition-all ${
               !isFleet
                 ? 'bg-green-600/10 border-green-500 shadow-lg shadow-green-500/20'
-                : 'bg-[#1a1d29] border-gray-700 hover:border-gray-600'
+                : 'bg-app-surface border-app-line-muted hover:border-gray-600'
             }`}
           >
             <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${!isFleet ? 'bg-green-600' : 'bg-gray-700'}`}>
@@ -111,7 +111,7 @@ export function LoginPage({ onLogin, initialPlatform = 'fleet' }: LoginPageProps
           <p className="text-gray-400 text-sm mt-1">{isFleet ? 'Fleet Management System' : 'Vacation Management System'}</p>
         </div>
 
-        <div className="bg-[#1a1d29] border border-gray-800 rounded-2xl p-8 shadow-2xl">
+        <div className="bg-app-surface border border-app-line rounded-2xl p-8 shadow-2xl">
           <h2 className="text-white text-xl font-semibold mb-1">Sign in to your account</h2>
           <p className="text-gray-400 text-sm mb-6">Enter your company email and password</p>
 
@@ -124,7 +124,7 @@ export function LoginPage({ onLogin, initialPlatform = 'fleet' }: LoginPageProps
                 onChange={e => { setEmail(e.target.value); setError(''); }}
                 placeholder="you@company.com"
                 required
-                className={`w-full bg-[#0f1117] border border-gray-700 rounded-lg px-4 py-3 text-white placeholder-gray-600 focus:outline-none transition-colors ${accentBorder}`}
+                className={`w-full bg-app-bg border border-app-line-muted rounded-lg px-4 py-3 text-white placeholder-gray-600 focus:outline-none transition-colors ${accentBorder}`}
               />
             </div>
 
@@ -137,7 +137,7 @@ export function LoginPage({ onLogin, initialPlatform = 'fleet' }: LoginPageProps
                   onChange={e => { setPassword(e.target.value); setError(''); }}
                   placeholder="••••••••"
                   required
-                  className={`w-full bg-[#0f1117] border border-gray-700 rounded-lg px-4 py-3 text-white placeholder-gray-600 focus:outline-none transition-colors pr-12 ${accentBorder}`}
+                  className={`w-full bg-app-bg border border-app-line-muted rounded-lg px-4 py-3 text-white placeholder-gray-600 focus:outline-none transition-colors pr-12 ${accentBorder}`}
                 />
                 <button
                   type="button"

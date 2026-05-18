@@ -75,7 +75,7 @@ export function SummaryCards() {
         return (
           <div
             key={index}
-            className={`bg-[#1a1d29] border ${card.borderColor} rounded-xl p-6 ${card.bgColor} hover:scale-105 transition-transform duration-200`}
+            className={`bg-app-surface border ${card.borderColor} rounded-xl p-6 ${card.bgColor} hover:scale-105 transition-transform duration-200`}
           >
             <div className="flex items-center justify-between mb-4">
               <div className={`p-3 ${card.bgColor} rounded-lg border ${card.borderColor}`}>

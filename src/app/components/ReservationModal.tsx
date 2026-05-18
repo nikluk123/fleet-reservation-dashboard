@@ -124,13 +124,13 @@ export function ReservationModal({ isOpen, onClose, onSubmit, preselectedVehicle
 
   return (
     <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-      <div className="bg-[#1a1d29] border border-gray-800 rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+      <div className="bg-app-surface border border-app-line rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
         {/* Header */}
-        <div className="flex items-center justify-between p-6 border-b border-gray-800">
+        <div className="flex items-center justify-between p-6 border-b border-app-line">
           <h2 className="text-2xl font-semibold text-white">New Reservation</h2>
           <button
             onClick={handleClose}
-            className="p-2 rounded-lg hover:bg-gray-800 transition-colors"
+            className="p-2 rounded-lg hover:bg-app-hover transition-colors"
           >
             <X className="w-5 h-5 text-gray-400" />
           </button>
@@ -154,7 +154,7 @@ export function ReservationModal({ isOpen, onClose, onSubmit, preselectedVehicle
                     }}
                     onFocus={() => setShowEmployeeDropdown(true)}
                     placeholder="Search employees..."
-                    className="w-full bg-[#0f1117] border border-gray-700 rounded-lg pl-10 pr-4 py-2.5 text-white focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"
+                    className="w-full bg-app-bg border border-app-line-muted rounded-lg pl-10 pr-4 py-2.5 text-white focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"
                     required
                   />
                 </div>
@@ -164,13 +164,13 @@ export function ReservationModal({ isOpen, onClose, onSubmit, preselectedVehicle
                       className="fixed inset-0 z-10"
                       onClick={() => setShowEmployeeDropdown(false)}
                     />
-                    <div className="absolute z-20 w-full mt-1 bg-[#1a1d29] border border-gray-700 rounded-lg shadow-xl max-h-60 overflow-y-auto">
+                    <div className="absolute z-20 w-full mt-1 bg-app-surface border border-app-line-muted rounded-lg shadow-xl max-h-60 overflow-y-auto">
                       {filteredEmployees.map((employee) => (
                         <button
                           key={employee.id}
                           type="button"
                           onClick={() => handleEmployeeSelect(employee)}
-                          className="w-full text-left px-4 py-3 hover:bg-gray-800 transition-colors border-b border-gray-800 last:border-b-0"
+                          className="w-full text-left px-4 py-3 hover:bg-app-hover transition-colors border-b border-app-line last:border-b-0"
                         >
                           <div className="text-white font-medium">{employee.name}</div>
                           <div className="text-gray-400 text-sm">{employee.email}</div>
@@ -182,7 +182,7 @@ export function ReservationModal({ isOpen, onClose, onSubmit, preselectedVehicle
                 )}
               </>
             ) : (
-              <div className="w-full bg-gray-800/50 border border-gray-700 rounded-lg px-4 py-2.5 text-gray-400 cursor-not-allowed">
+              <div className="w-full bg-gray-800/50 border border-app-line-muted rounded-lg px-4 py-2.5 text-gray-400 cursor-not-allowed">
                 {currentUser.name}
               </div>
             )}
@@ -195,7 +195,7 @@ export function ReservationModal({ isOpen, onClose, onSubmit, preselectedVehicle
               type="text"
               value={formData.sector}
               readOnly
-              className="w-full bg-gray-800/50 border border-gray-700 rounded-lg px-4 py-2.5 text-gray-400 cursor-not-allowed"
+              className="w-full bg-gray-800/50 border border-app-line-muted rounded-lg px-4 py-2.5 text-gray-400 cursor-not-allowed"
             />
           </div>
 
@@ -205,7 +205,7 @@ export function ReservationModal({ isOpen, onClose, onSubmit, preselectedVehicle
             <select
               value={formData.vehicleId}
               onChange={(e) => handleInputChange('vehicleId', e.target.value)}
-              className="w-full bg-[#0f1117] border border-gray-700 rounded-lg px-4 py-2.5 text-white focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"
+              className="w-full bg-app-bg border border-app-line-muted rounded-lg px-4 py-2.5 text-white focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"
               required
             >
               <option value="">Select a vehicle</option>
@@ -223,7 +223,7 @@ export function ReservationModal({ isOpen, onClose, onSubmit, preselectedVehicle
             <select
               value={formData.project}
               onChange={(e) => handleInputChange('project', e.target.value)}
-              className="w-full bg-[#0f1117] border border-gray-700 rounded-lg px-4 py-2.5 text-white focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"
+              className="w-full bg-app-bg border border-app-line-muted rounded-lg px-4 py-2.5 text-white focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"
             >
               <option value="">Select a project (optional)</option>
               {projects.map((project) => (
@@ -242,7 +242,7 @@ export function ReservationModal({ isOpen, onClose, onSubmit, preselectedVehicle
                 type="datetime-local"
                 value={formData.startDate}
                 onChange={(e) => handleInputChange('startDate', e.target.value)}
-                className="w-full bg-[#0f1117] border border-gray-700 rounded-lg px-4 py-2.5 text-white focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"
+                className="w-full bg-app-bg border border-app-line-muted rounded-lg px-4 py-2.5 text-white focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"
                 required
               />
             </div>
@@ -252,7 +252,7 @@ export function ReservationModal({ isOpen, onClose, onSubmit, preselectedVehicle
                 type="datetime-local"
                 value={formData.endDate}
                 onChange={(e) => handleInputChange('endDate', e.target.value)}
-                className="w-full bg-[#0f1117] border border-gray-700 rounded-lg px-4 py-2.5 text-white focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"
+                className="w-full bg-app-bg border border-app-line-muted rounded-lg px-4 py-2.5 text-white focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"
                 required
               />
             </div>
@@ -289,17 +289,17 @@ export function ReservationModal({ isOpen, onClose, onSubmit, preselectedVehicle
               value={formData.notes}
               onChange={(e) => handleInputChange('notes', e.target.value)}
               rows={3}
-              className="w-full bg-[#0f1117] border border-gray-700 rounded-lg px-4 py-2.5 text-white focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 resize-none"
+              className="w-full bg-app-bg border border-app-line-muted rounded-lg px-4 py-2.5 text-white focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 resize-none"
               placeholder="Add any additional notes..."
             />
           </div>
 
           {/* Actions */}
-          <div className="flex items-center justify-end gap-3 pt-4 border-t border-gray-800">
+          <div className="flex items-center justify-end gap-3 pt-4 border-t border-app-line">
             <button
               type="button"
               onClick={handleClose}
-              className="px-6 py-2.5 border border-gray-700 rounded-lg text-gray-400 hover:bg-gray-800 transition-colors"
+              className="px-6 py-2.5 border border-app-line-muted rounded-lg text-gray-400 hover:bg-app-hover transition-colors"
             >
               Cancel
             </button>

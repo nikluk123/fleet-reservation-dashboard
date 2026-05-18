@@ -18,6 +18,7 @@ import { MyReservationsPage } from './components/MyReservationsPage';
 import { AdminPage } from './components/AdminPage';
 import { LoginPage, type Platform } from './components/LoginPage';
 import { VacationApp } from './components/vacation/VacationApp';
+import { ThemeProvider } from './context/ThemeContext';
 import { type Vehicle, type Employee } from './data/mockData';
 import { supabase } from '../lib/supabaseClient';
 
@@ -111,7 +112,7 @@ function AppContent({ onSwitchToVacation }: { onSwitchToVacation: () => void }) 
       case 'admin':
         if (currentUser.role !== 'admin') {
           return (
-            <div className="bg-[#1a1d29] border border-gray-800 rounded-xl p-12 text-center">
+            <div className="bg-app-surface border border-app-line rounded-xl p-12 text-center">
               <h2 className="text-2xl font-semibold text-white mb-2">Access Denied</h2>
               <p className="text-gray-400">You don't have permission to access the admin panel.</p>
             </div>
@@ -172,7 +173,7 @@ function AppContent({ onSwitchToVacation }: { onSwitchToVacation: () => void }) 
   };
 
   return (
-    <div className="flex h-screen bg-[#0f1117]">
+    <div className="flex h-screen bg-app-bg">
       <Toaster position="top-right" richColors />
 
       <Sidebar
@@ -284,32 +285,38 @@ export default function App() {
 
   if (loadingUser) {
     return (
-      <div className="min-h-screen bg-[#0f1117] flex items-center justify-center">
-        <div className="w-10 h-10 border-2 border-blue-500/30 border-t-blue-500 rounded-full animate-spin" />
-      </div>
+      <ThemeProvider>
+        <div className="min-h-screen bg-app-bg flex items-center justify-center">
+          <div className="w-10 h-10 border-2 border-blue-500/30 border-t-blue-500 rounded-full animate-spin" />
+        </div>
+      </ThemeProvider>
     );
   }
 
   if (!loggedInUserId || !loggedEmployee) {
     return (
-      <>
+      <ThemeProvider>
         <Toaster position="top-right" richColors />
         <LoginPage onLogin={handleLogin} initialPlatform={activePlatform} />
-      </>
+      </ThemeProvider>
     );
   }
 
   if (activePlatform === 'vacation') {
     return (
-      <VacationProvider initialUser={loggedEmployee} onLogout={handleLogout}>
-        <VacationApp onSwitchToFleet={() => handleSwitchPlatform('fleet')} />
-      </VacationProvider>
+      <ThemeProvider>
+        <VacationProvider initialUser={loggedEmployee} onLogout={handleLogout}>
+          <VacationApp onSwitchToFleet={() => handleSwitchPlatform('fleet')} />
+        </VacationProvider>
+      </ThemeProvider>
     );
   }
 
   return (
-    <FleetProvider initialUser={loggedEmployee}>
-      <AppContent onSwitchToVacation={() => handleSwitchPlatform('vacation')} />
-    </FleetProvider>
+    <ThemeProvider>
+      <FleetProvider initialUser={loggedEmployee}>
+        <AppContent onSwitchToVacation={() => handleSwitchPlatform('vacation')} />
+      </FleetProvider>
+    </ThemeProvider>
   );
 }

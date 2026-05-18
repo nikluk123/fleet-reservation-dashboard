@@ -28,7 +28,7 @@ function PendingSection() {
   const fmt = (d: string) => new Date(d + 'T00:00:00').toLocaleDateString('en-GB', { dateStyle: 'medium' });
 
   return (
-    <div className="bg-[#1a1d29] border border-orange-500/30 rounded-xl p-6">
+    <div className="bg-app-surface border border-orange-500/30 rounded-xl p-6">
       <div className="flex items-center gap-3 mb-4">
         <Clock className="w-5 h-5 text-orange-400" />
         <h3 className="text-white font-semibold">
@@ -38,7 +38,7 @@ function PendingSection() {
 
       <div className="space-y-3">
         {pending.map(req => (
-          <div key={req.id} className="bg-[#0f1117] border border-gray-700 rounded-lg p-4 flex items-center justify-between gap-4">
+          <div key={req.id} className="bg-app-bg border border-app-line-muted rounded-lg p-4 flex items-center justify-between gap-4">
             <div className="min-w-0">
               <p className="text-white font-medium truncate">
                 {req.employeeName} — <span className="text-orange-400">{req.daysCount} days</span>
@@ -111,7 +111,7 @@ export function VacationApp({ onSwitchToFleet }: Props) {
   };
 
   return (
-    <div className="flex h-screen bg-[#0f1117]">
+    <div className="flex h-screen bg-app-bg">
       <Toaster position="top-right" richColors />
 
       <VacationSidebar

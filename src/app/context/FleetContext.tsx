@@ -557,7 +557,7 @@ export function FleetProvider({ children, initialUser }: { children: ReactNode; 
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-[#0f1117] flex items-center justify-center">
+      <div className="min-h-screen bg-app-bg flex items-center justify-center">
         <div className="w-10 h-10 border-2 border-blue-500/30 border-t-blue-500 rounded-full animate-spin" />
       </div>
     );
@@ -565,7 +565,7 @@ export function FleetProvider({ children, initialUser }: { children: ReactNode; 
 
   if (loadError) {
     return (
-      <div className="min-h-screen bg-[#0f1117] flex items-center justify-center text-center px-4">
+      <div className="min-h-screen bg-app-bg flex items-center justify-center text-center px-4">
         <div>
           <p className="text-red-400 text-lg font-semibold mb-2">Database connection failed</p>
           <p className="text-gray-400 text-sm mb-4">Check your internet connection and try again.</p>

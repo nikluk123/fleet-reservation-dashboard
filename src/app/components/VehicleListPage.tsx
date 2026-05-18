@@ -37,7 +37,7 @@ export function VehicleListPage({ onSelectVehicle }: VehicleListPageProps) {
 
   return (
     <div className="space-y-6">
-      <div className="bg-[#1a1d29] border border-gray-800 rounded-xl p-6">
+      <div className="bg-app-surface border border-app-line rounded-xl p-6">
         <div className="flex items-center justify-between mb-6">
           <div>
             <h2 className="text-2xl font-semibold text-white mb-1">Complete Vehicle List</h2>
@@ -48,7 +48,7 @@ export function VehicleListPage({ onSelectVehicle }: VehicleListPageProps) {
             <select
               value={sortBy}
               onChange={(e) => setSortBy(e.target.value as any)}
-              className="bg-[#0f1117] border border-gray-700 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-blue-500"
+              className="bg-app-bg border border-app-line-muted rounded-lg px-4 py-2 text-white focus:outline-none focus:border-blue-500"
             >
               <option value="model">Model</option>
               <option value="plate">Plate</option>
@@ -61,7 +61,7 @@ export function VehicleListPage({ onSelectVehicle }: VehicleListPageProps) {
         <div className="overflow-x-auto">
           <table className="w-full">
             <thead>
-              <tr className="border-b border-gray-800">
+              <tr className="border-b border-app-line">
                 <th className="text-left text-gray-400 text-sm font-medium py-3 px-4">Model</th>
                 <th className="text-left text-gray-400 text-sm font-medium py-3 px-4">Plate</th>
                 <th className="text-left text-gray-400 text-sm font-medium py-3 px-4">Type</th>
@@ -73,7 +73,7 @@ export function VehicleListPage({ onSelectVehicle }: VehicleListPageProps) {
             </thead>
             <tbody>
               {sortedVehicles.map((vehicle) => (
-                <tr key={vehicle.id} className="border-b border-gray-800 hover:bg-gray-800/30 transition-colors">
+                <tr key={vehicle.id} className="border-b border-app-line hover:bg-app-hover/30 transition-colors">
                   <td className="py-4 px-4 text-white font-medium">{vehicle.model}</td>
                   <td className="py-4 px-4 text-gray-400 font-mono">{vehicle.plate}</td>
                   <td className="py-4 px-4 text-gray-400">{vehicle.type}</td>

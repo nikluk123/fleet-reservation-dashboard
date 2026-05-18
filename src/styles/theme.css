@@ -1,5 +1,42 @@
 @custom-variant dark (&:is(.dark *));
 
+/* ── App theme variables ─────────────────────────────────── */
+:root {
+  --app-bg: #0f1117;
+  --app-surface: #1a1d29;
+  --app-line: #1f2937;
+  --app-line-muted: #374151;
+  --app-hover: #1f2937;
+  --app-text: #ffffff;
+  --app-text-muted: #9ca3af;
+}
+
+html.light {
+  --app-bg: #f1f5f9;
+  --app-surface: #ffffff;
+  --app-line: #e2e8f0;
+  --app-line-muted: #cbd5e1;
+  --app-hover: #e2e8f0;
+  --app-text: #0f172a;
+  --app-text-muted: #64748b;
+}
+
+/* ── Light mode text overrides ───────────────────────────── */
+html.light .text-white { color: #0f172a; }
+html.light .text-gray-400 { color: #64748b; }
+html.light .text-gray-500 { color: #94a3b8; }
+html.light .text-gray-600 { color: #64748b; }
+
+/* Preserve white text on colored action buttons */
+html.light .bg-green-600,
+html.light .bg-green-700,
+html.light .bg-blue-600,
+html.light .bg-blue-700,
+html.light .bg-red-500,
+html.light .bg-red-600,
+html.light .bg-orange-500,
+html.light .bg-purple-600 { color: white; }
+
 :root {
   --font-size: 16px;
   --background: #ffffff;
@@ -117,6 +154,13 @@
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-ring: var(--sidebar-ring);
+  --color-app-bg: var(--app-bg);
+  --color-app-surface: var(--app-surface);
+  --color-app-line: var(--app-line);
+  --color-app-line-muted: var(--app-line-muted);
+  --color-app-hover: var(--app-hover);
+  --color-app-text: var(--app-text);
+  --color-app-text-muted: var(--app-text-muted);
 }
 
 @layer base {

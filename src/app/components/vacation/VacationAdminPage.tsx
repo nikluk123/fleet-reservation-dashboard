@@ -20,10 +20,10 @@ export function VacationAdminPage() {
 
   return (
     <div className="space-y-6">
-      <div className="bg-[#1a1d29] border border-gray-800 rounded-xl p-6">
+      <div className="bg-app-surface border border-app-line rounded-xl p-6">
         <h2 className="text-2xl font-semibold text-white mb-6">Admin Panel</h2>
 
-        <div className="flex gap-1 mb-6 border-b border-gray-800">
+        <div className="flex gap-1 mb-6 border-b border-app-line">
           {tabs.map(tab => (
             <button
               key={tab.id}
@@ -124,7 +124,7 @@ function EmployeesTab() {
         <div className="flex gap-2">
           <button
             onClick={exportToExcel}
-            className="flex items-center gap-2 px-4 py-2 bg-[#0f1117] border border-gray-700 hover:border-gray-500 text-gray-400 hover:text-white rounded-lg text-sm transition-colors"
+            className="flex items-center gap-2 px-4 py-2 bg-app-bg border border-app-line-muted hover:border-gray-500 text-gray-400 hover:text-white rounded-lg text-sm transition-colors"
           >
             <Download className="w-4 h-4" />
             Export Excel
@@ -140,7 +140,7 @@ function EmployeesTab() {
       </div>
 
       {showAddForm && (
-        <form onSubmit={handleAdd} className="bg-[#0f1117] border border-green-500/30 rounded-xl p-5 mb-5 space-y-4">
+        <form onSubmit={handleAdd} className="bg-app-bg border border-green-500/30 rounded-xl p-5 mb-5 space-y-4">
           <h4 className="text-white font-medium flex items-center gap-2">
             <Plus className="w-4 h-4 text-green-400" /> New Employee
           </h4>
@@ -211,7 +211,7 @@ function EmployeesTab() {
             </div>
           </div>
           <div className="flex justify-end gap-2 pt-1">
-            <button type="button" onClick={() => setShowAddForm(false)} className="px-4 py-2 border border-gray-700 text-gray-400 rounded-lg text-sm hover:bg-gray-800 transition-colors">
+            <button type="button" onClick={() => setShowAddForm(false)} className="px-4 py-2 border border-app-line-muted text-gray-400 rounded-lg text-sm hover:bg-app-hover transition-colors">
               Cancel
             </button>
             <button type="submit" disabled={saving} className="px-4 py-2 bg-green-600 hover:bg-green-700 disabled:bg-gray-700 text-white rounded-lg text-sm transition-colors font-medium">
@@ -224,7 +224,7 @@ function EmployeesTab() {
       <div className="overflow-x-auto">
         <table className="w-full">
           <thead>
-            <tr className="border-b border-gray-800">
+            <tr className="border-b border-app-line">
               {['Name', 'Email', 'Sector', 'Vacation Role', 'Total Days', 'Used', 'Remaining', ''].map(h => (
                 <th key={h} className="text-left text-gray-400 text-sm font-medium py-3 px-4">{h}</th>
               ))}
@@ -235,7 +235,7 @@ function EmployeesTab() {
               const used = getUsedDays(emp.id);
               const remaining = (emp.vacationDaysTotal ?? 20) - used;
               return (
-                <tr key={emp.id} className="border-b border-gray-800 hover:bg-gray-800/20">
+                <tr key={emp.id} className="border-b border-app-line hover:bg-app-hover/20">
                   {editingId === emp.id ? (
                     <>
                       <td className="py-3 px-4 text-white">{emp.name}</td>
@@ -342,7 +342,7 @@ function RequestsTab() {
             <button
               key={f}
               onClick={() => setFilter(f)}
-              className={`px-3 py-1.5 rounded-lg text-sm transition-colors capitalize ${filter === f ? 'bg-green-600 text-white' : 'text-gray-400 hover:bg-gray-800 hover:text-white'}`}
+              className={`px-3 py-1.5 rounded-lg text-sm transition-colors capitalize ${filter === f ? 'bg-green-600 text-white' : 'text-gray-400 hover:bg-app-hover hover:text-white'}`}
             >
               {f}
             </button>
@@ -355,7 +355,7 @@ function RequestsTab() {
         {visible.map(req => {
           const emp = employees.find(e => e.id === req.employeeId);
           return (
-            <div key={req.id} className="bg-[#0f1117] border border-gray-700 rounded-lg p-4 flex items-center justify-between gap-4">
+            <div key={req.id} className="bg-app-bg border border-app-line-muted rounded-lg p-4 flex items-center justify-between gap-4">
               <div className="flex items-center gap-3 min-w-0">
                 {getStatusIcon(req.status)}
                 <div className="min-w-0">
@@ -398,7 +398,7 @@ function RequestsTab() {
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
-const inputCls = 'w-full bg-[#0f1117] border border-gray-700 rounded px-3 py-1.5 text-white text-sm focus:outline-none focus:border-green-500';
+const inputCls = 'w-full bg-app-bg border border-app-line-muted rounded px-3 py-1.5 text-white text-sm focus:outline-none focus:border-green-500';
 
 function IconBtn({ icon: Icon, color, onClick }: { icon: any; color: 'green' | 'red' | 'blue' | 'gray'; onClick: () => void }) {
   const colors = {
