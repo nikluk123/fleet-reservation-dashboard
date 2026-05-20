@@ -401,7 +401,9 @@ async function downloadResenje(req: VacationRequest, emp: Employee | undefined, 
   const year = new Date(req.startDate + 'T00:00:00').getFullYear();
   const returnDate = nextWorkingDay(req.endDate);
   const jobTitle = emp?.jobTitle ?? '___________________';
-  const totalDays = emp?.vacationDaysTotal ?? 20;
+  const totalDays = (emp?.educationLevel || emp?.nesStartDate)
+    ? calcVacationDays(emp!)
+    : (emp?.vacationDaysTotal ?? 20);
 
   const doc = new Document({
     creator: 'NES Fleet & Leave',
