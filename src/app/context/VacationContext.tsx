@@ -321,7 +321,7 @@ export function VacationProvider({ initialUser, onLogout, children }: Props) {
     const { error } = await supabase.from('employees').update(updates).eq('id', id);
     if (error) {
       if (prev) setEmployees(p => p.map(e => e.id === id ? prev : e));
-      toast.error('Failed to update employee');
+      toast.error(`Failed to update employee: ${error.message}`);
     } else {
       toast.success('Employee updated');
     }
