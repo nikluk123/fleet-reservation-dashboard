@@ -487,8 +487,7 @@ async function downloadResenje(req: VacationRequest, emp: Employee | undefined, 
         })] : [new Paragraph({ children: [tr('')], spacing: { after: 200 } })]),
 
         // Legal preamble
-        body([tr('Na osnovu člana 68. do 70. i 75. Zakona o radu („Sl. glasnik RS”, br. 24/2005, 61/2005, 32/2013 i 75/2014), a u skladu s ugovorom o radu,')]),
-        body([tr(`Generalni direktor, NEW ENERGY SOLUTIONS DOO Tošin bunar 270, 11000, Beograd-Novi Beograd, Srbija, ${DIRECTOR}, donosi:`)]),
+        body([tr(`Na osnovu člana 68. do 70. i 75. Zakona o radu („Sl. glasnik RS”, br. 24/2005, 61/2005, 32/2013 i 75/2014), a u skladu s ugovorom o radu, Generalni direktor, NEW ENERGY SOLUTIONS DOO Tošin bunar 270, 11000, Beograd-Novi Beograd, Srbija, ${DIRECTOR}, donosi:`)]),
 
         // Empty line before REŠENJE
         new Paragraph({ children: [tr('')], spacing: { after: 0, line: LINE_115, lineRule: 'auto' as any } }),
