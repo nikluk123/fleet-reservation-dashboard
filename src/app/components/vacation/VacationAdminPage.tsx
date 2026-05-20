@@ -1,7 +1,8 @@
-import { useState } from 'react';
-import { Save, X, CheckCircle, Clock, XCircle, Trash2, Edit, Plus, UserPlus, Download, FileDown } from 'lucide-react';
+import { useState, Fragment } from 'react';
+import { Save, X, CheckCircle, Clock, XCircle, Trash2, Edit, Plus, UserPlus, Download, FileDown, RefreshCw } from 'lucide-react';
 import * as XLSX from 'xlsx';
 import { Document, Packer, Paragraph, TextRun, HeadingLevel, AlignmentType } from 'docx';
+import { calcVacationDays } from '../../data/vacationTypes';
 import { useVacation } from '../../context/VacationContext';
 import { type VacationRequest } from '../../data/vacationTypes';
 import { type Employee } from '../../data/mockData';
@@ -49,12 +50,26 @@ export function VacationAdminPage() {
 
 // ── Employees Tab ──────────────────────────────────────────────────────────────
 
-const emptyForm = { name: '', email: '', sector: '', vacationDaysTotal: 20, vacationRole: 'user' };
+const emptyForm = {
+  name: '', email: '', sector: '', vacationDaysTotal: 20, vacationRole: 'user',
+  jobTitle: '', educationLevel: '' as '' | 'SSS' | 'VSS', nesStartDate: '',
+  hasChildrenUnder15: false, isSingleParent: false,
+};
+
+type EditData = {
+  vacationDaysTotal: number; vacationRole: string;
+  jobTitle: string; educationLevel: '' | 'SSS' | 'VSS'; nesStartDate: string;
+  hasChildrenUnder15: boolean; isSingleParent: boolean;
+};
 
 function EmployeesTab() {
   const { employees, departments, updateEmployeeVacation, addEmployee, deleteEmployee, getUsedDays } = useVacation();
   const [editingId, setEditingId] = useState<string | null>(null);
-  const [editData, setEditData] = useState<{ vacationDaysTotal: number; vacationRole: string }>({ vacationDaysTotal: 20, vacationRole: 'user' });
+  const [editData, setEditData] = useState<EditData>({
+    vacationDaysTotal: 20, vacationRole: 'user',
+    jobTitle: '', educationLevel: '', nesStartDate: '',
+    hasChildrenUnder15: false, isSingleParent: false,
+  });
   const [showAddForm, setShowAddForm] = useState(false);
   const [newEmp, setNewEmp] = useState(emptyForm);
   const [saving, setSaving] = useState(false);
@@ -97,13 +112,26 @@ function EmployeesTab() {
 
   const startEdit = (emp: Employee) => {
     setEditingId(emp.id);
-    setEditData({ vacationDaysTotal: emp.vacationDaysTotal ?? 20, vacationRole: emp.vacationRole ?? 'user' });
+    setEditData({
+      vacationDaysTotal: emp.vacationDaysTotal ?? 20,
+      vacationRole: emp.vacationRole ?? 'user',
+      jobTitle: emp.jobTitle ?? '',
+      educationLevel: (emp.educationLevel ?? '') as '' | 'SSS' | 'VSS',
+      nesStartDate: emp.nesStartDate ?? '',
+      hasChildrenUnder15: emp.hasChildrenUnder15 ?? false,
+      isSingleParent: emp.isSingleParent ?? false,
+    });
   };
 
   const saveEdit = () => {
     if (!editingId) return;
     updateEmployeeVacation(editingId, editData);
     setEditingId(null);
+  };
+
+  const recalcEdit = () => {
+    const calc = calcVacationDays(editData);
+    setEditData(p => ({ ...p, vacationDaysTotal: calc }));
   };
 
   const roleLabel = (role: string) => {
@@ -145,37 +173,22 @@ function EmployeesTab() {
           <h4 className="text-white font-medium flex items-center gap-2">
             <Plus className="w-4 h-4 text-green-400" /> New Employee
           </h4>
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-3 gap-3">
             <div>
               <label className="block text-gray-400 text-xs mb-1">Full Name *</label>
-              <input
-                type="text"
-                value={newEmp.name}
-                onChange={e => setNewEmp({ ...newEmp, name: e.target.value })}
-                required
-                placeholder="John Doe"
-                className={inputCls}
-              />
+              <input type="text" value={newEmp.name} onChange={e => setNewEmp({ ...newEmp, name: e.target.value })} required placeholder="Nikola Luković" className={inputCls} />
             </div>
             <div>
               <label className="block text-gray-400 text-xs mb-1">Email *</label>
-              <input
-                type="email"
-                value={newEmp.email}
-                onChange={e => setNewEmp({ ...newEmp, email: e.target.value })}
-                required
-                placeholder="john@company.com"
-                className={inputCls}
-              />
+              <input type="email" value={newEmp.email} onChange={e => setNewEmp({ ...newEmp, email: e.target.value })} required placeholder="ime@nes.rs" className={inputCls} />
+            </div>
+            <div>
+              <label className="block text-gray-400 text-xs mb-1">Job Title</label>
+              <input type="text" value={newEmp.jobTitle} onChange={e => setNewEmp({ ...newEmp, jobTitle: e.target.value })} placeholder="Direktor tehničkih operacija" className={inputCls} />
             </div>
             <div>
               <label className="block text-gray-400 text-xs mb-1">Sector *</label>
-              <select
-                value={newEmp.sector}
-                onChange={e => setNewEmp({ ...newEmp, sector: e.target.value })}
-                required
-                className={inputCls}
-              >
+              <select value={newEmp.sector} onChange={e => setNewEmp({ ...newEmp, sector: e.target.value })} required className={inputCls}>
                 <option value="">Select sector</option>
                 {topLevelDepts.map(dept => (
                   <optgroup key={dept.id} label={dept.name}>
@@ -188,12 +201,20 @@ function EmployeesTab() {
               </select>
             </div>
             <div>
+              <label className="block text-gray-400 text-xs mb-1">Stručna sprema</label>
+              <select value={newEmp.educationLevel} onChange={e => setNewEmp({ ...newEmp, educationLevel: e.target.value as any, vacationDaysTotal: calcVacationDays({ ...newEmp, educationLevel: e.target.value }) })} className={inputCls}>
+                <option value="">—</option>
+                <option value="SSS">SSS (+3 dana)</option>
+                <option value="VSS">VŠS/VSS (+4 dana)</option>
+              </select>
+            </div>
+            <div>
+              <label className="block text-gray-400 text-xs mb-1">Datum početka rada u NES</label>
+              <input type="date" value={newEmp.nesStartDate} onChange={e => setNewEmp({ ...newEmp, nesStartDate: e.target.value, vacationDaysTotal: calcVacationDays({ ...newEmp, nesStartDate: e.target.value }) })} className={inputCls} />
+            </div>
+            <div>
               <label className="block text-gray-400 text-xs mb-1">Vacation Role</label>
-              <select
-                value={newEmp.vacationRole}
-                onChange={e => setNewEmp({ ...newEmp, vacationRole: e.target.value })}
-                className={inputCls}
-              >
+              <select value={newEmp.vacationRole} onChange={e => setNewEmp({ ...newEmp, vacationRole: e.target.value })} className={inputCls}>
                 <option value="user">Employee</option>
                 <option value="sector_admin">Sector Admin</option>
                 <option value="admin">Admin</option>
@@ -201,23 +222,22 @@ function EmployeesTab() {
             </div>
             <div>
               <label className="block text-gray-400 text-xs mb-1">Vacation Days / Year</label>
-              <input
-                type="number"
-                min={0}
-                max={365}
-                value={newEmp.vacationDaysTotal}
-                onChange={e => setNewEmp({ ...newEmp, vacationDaysTotal: parseInt(e.target.value) || 0 })}
-                className={inputCls}
-              />
+              <input type="number" min={0} max={365} value={newEmp.vacationDaysTotal} onChange={e => setNewEmp({ ...newEmp, vacationDaysTotal: parseInt(e.target.value) || 0 })} className={inputCls} />
+            </div>
+            <div className="flex flex-col gap-2 justify-center pt-3">
+              <label className="flex items-center gap-2 text-gray-400 text-xs cursor-pointer">
+                <input type="checkbox" checked={newEmp.hasChildrenUnder15} onChange={e => setNewEmp({ ...newEmp, hasChildrenUnder15: e.target.checked, vacationDaysTotal: calcVacationDays({ ...newEmp, hasChildrenUnder15: e.target.checked }) })} className="accent-green-500" />
+                Roditelj dece do 15g (+1 dan)
+              </label>
+              <label className="flex items-center gap-2 text-gray-400 text-xs cursor-pointer">
+                <input type="checkbox" checked={newEmp.isSingleParent} onChange={e => setNewEmp({ ...newEmp, isSingleParent: e.target.checked, vacationDaysTotal: calcVacationDays({ ...newEmp, isSingleParent: e.target.checked }) })} className="accent-green-500" />
+                Samohrani roditelj (+1 dan)
+              </label>
             </div>
           </div>
           <div className="flex justify-end gap-2 pt-1">
-            <button type="button" onClick={() => setShowAddForm(false)} className="px-4 py-2 border border-app-line-muted text-gray-400 rounded-lg text-sm hover:bg-app-hover transition-colors">
-              Cancel
-            </button>
-            <button type="submit" disabled={saving} className="px-4 py-2 bg-green-600 hover:bg-green-700 disabled:bg-gray-700 text-white rounded-lg text-sm transition-colors font-medium">
-              {saving ? 'Saving...' : 'Add Employee'}
-            </button>
+            <button type="button" onClick={() => setShowAddForm(false)} className="px-4 py-2 border border-app-line-muted text-gray-400 rounded-lg text-sm hover:bg-app-hover transition-colors">Cancel</button>
+            <button type="submit" disabled={saving} className="px-4 py-2 bg-green-600 hover:bg-green-700 disabled:bg-gray-700 text-white rounded-lg text-sm transition-colors font-medium">{saving ? 'Saving...' : 'Add Employee'}</button>
           </div>
         </form>
       )}
@@ -236,68 +256,91 @@ function EmployeesTab() {
               const used = getUsedDays(emp.id);
               const remaining = (emp.vacationDaysTotal ?? 20) - used;
               return (
-                <tr key={emp.id} className="border-b border-app-line hover:bg-app-hover/20">
-                  {editingId === emp.id ? (
-                    <>
-                      <td className="py-3 px-4 text-white">{emp.name}</td>
-                      <td className="py-3 px-4 text-gray-400 text-xs">{emp.email}</td>
-                      <td className="py-3 px-4 text-gray-400 text-sm">{emp.sector}</td>
-                      <td className="py-2 px-4">
-                        <select
-                          value={editData.vacationRole}
-                          onChange={e => setEditData({ ...editData, vacationRole: e.target.value })}
-                          className={inputCls}
-                        >
-                          <option value="user">Employee</option>
-                          <option value="sector_admin">Sector Admin</option>
-                          <option value="admin">Admin</option>
-                        </select>
-                      </td>
-                      <td className="py-2 px-4">
-                        <input
-                          type="number"
-                          min={0}
-                          max={365}
-                          value={editData.vacationDaysTotal}
-                          onChange={e => setEditData({ ...editData, vacationDaysTotal: parseInt(e.target.value) || 0 })}
-                          className={inputCls}
-                        />
-                      </td>
-                      <td className="py-3 px-4 text-gray-400">{used}</td>
-                      <td className="py-3 px-4 text-gray-400">{(editData.vacationDaysTotal) - used}</td>
-                      <td className="py-2 px-4">
-                        <div className="flex gap-1 justify-end">
-                          <IconBtn icon={Save} color="green" onClick={saveEdit} />
-                          <IconBtn icon={X} color="gray" onClick={() => setEditingId(null)} />
+                <Fragment key={emp.id}>
+                  <tr className="border-b border-app-line hover:bg-app-hover/20">
+                    <td className="py-3 px-4">
+                      <p className="text-white">{emp.name}</p>
+                      {emp.jobTitle && <p className="text-gray-500 text-xs mt-0.5">{emp.jobTitle}</p>}
+                    </td>
+                    <td className="py-3 px-4 text-gray-400 text-xs">{emp.email}</td>
+                    <td className="py-3 px-4 text-gray-400 text-sm">{emp.sector}</td>
+                    <td className="py-3 px-4">
+                      <span className={`px-2 py-1 rounded-full text-xs ${roleColor(emp.vacationRole ?? 'user')}`}>
+                        {roleLabel(emp.vacationRole ?? 'user')}
+                      </span>
+                    </td>
+                    <td className="py-3 px-4 text-white font-medium">{emp.vacationDaysTotal ?? 20}</td>
+                    <td className="py-3 px-4 text-gray-400">{used}</td>
+                    <td className="py-3 px-4">
+                      <span className={`font-medium ${remaining <= 3 ? 'text-red-400' : remaining <= 7 ? 'text-orange-400' : 'text-green-400'}`}>{remaining}</span>
+                    </td>
+                    <td className="py-3 px-4">
+                      <div className="flex gap-1 justify-end">
+                        <IconBtn icon={editingId === emp.id ? X : Edit} color={editingId === emp.id ? 'gray' : 'blue'} onClick={() => editingId === emp.id ? setEditingId(null) : startEdit(emp)} />
+                        <IconBtn icon={Trash2} color="red" onClick={() => confirm('Delete this employee?') && deleteEmployee(emp.id)} />
+                      </div>
+                    </td>
+                  </tr>
+                  {editingId === emp.id && (
+                    <tr className="bg-app-hover/10">
+                      <td colSpan={8} className="px-4 pb-4 pt-2">
+                        <div className="bg-app-bg border border-green-500/30 rounded-xl p-4 space-y-3">
+                          <div className="grid grid-cols-3 gap-3">
+                            <div>
+                              <label className="block text-gray-400 text-xs mb-1">Job Title / Radno mesto</label>
+                              <input type="text" value={editData.jobTitle} onChange={e => setEditData(p => ({ ...p, jobTitle: e.target.value }))} placeholder="Direktor tehničkih operacija" className={inputCls} />
+                            </div>
+                            <div>
+                              <label className="block text-gray-400 text-xs mb-1">Stručna sprema</label>
+                              <select value={editData.educationLevel} onChange={e => setEditData(p => ({ ...p, educationLevel: e.target.value as any }))} className={inputCls}>
+                                <option value="">—</option>
+                                <option value="SSS">SSS (+3 dana)</option>
+                                <option value="VSS">VŠS/VSS (+4 dana)</option>
+                              </select>
+                            </div>
+                            <div>
+                              <label className="block text-gray-400 text-xs mb-1">Datum početka rada u NES</label>
+                              <input type="date" value={editData.nesStartDate} onChange={e => setEditData(p => ({ ...p, nesStartDate: e.target.value }))} className={inputCls} />
+                            </div>
+                            <div>
+                              <label className="block text-gray-400 text-xs mb-1">Vacation Role</label>
+                              <select value={editData.vacationRole} onChange={e => setEditData(p => ({ ...p, vacationRole: e.target.value }))} className={inputCls}>
+                                <option value="user">Employee</option>
+                                <option value="sector_admin">Sector Admin</option>
+                                <option value="admin">Admin</option>
+                              </select>
+                            </div>
+                            <div>
+                              <label className="block text-gray-400 text-xs mb-1">Vacation Days / Year</label>
+                              <div className="flex gap-1">
+                                <input type="number" min={0} max={365} value={editData.vacationDaysTotal} onChange={e => setEditData(p => ({ ...p, vacationDaysTotal: parseInt(e.target.value) || 0 }))} className={inputCls} />
+                                <button type="button" onClick={recalcEdit} title="Auto-izračunaj iz kriterijuma" className="flex-shrink-0 px-2 py-1 bg-green-600/20 border border-green-600/40 text-green-400 rounded text-xs hover:bg-green-600/30 transition-colors">
+                                  <RefreshCw className="w-3.5 h-3.5" />
+                                </button>
+                              </div>
+                            </div>
+                            <div className="flex flex-col gap-2 justify-center">
+                              <label className="flex items-center gap-2 text-gray-400 text-xs cursor-pointer">
+                                <input type="checkbox" checked={editData.hasChildrenUnder15} onChange={e => setEditData(p => ({ ...p, hasChildrenUnder15: e.target.checked }))} className="accent-green-500" />
+                                Roditelj dece do 15g (+1 dan)
+                              </label>
+                              <label className="flex items-center gap-2 text-gray-400 text-xs cursor-pointer">
+                                <input type="checkbox" checked={editData.isSingleParent} onChange={e => setEditData(p => ({ ...p, isSingleParent: e.target.checked }))} className="accent-green-500" />
+                                Samohrani roditelj (+1 dan)
+                              </label>
+                            </div>
+                          </div>
+                          <div className="flex justify-end gap-2 border-t border-app-line pt-3">
+                            <button type="button" onClick={() => setEditingId(null)} className="px-3 py-1.5 border border-app-line-muted text-gray-400 rounded-lg text-sm hover:bg-app-hover transition-colors">Cancel</button>
+                            <button type="button" onClick={saveEdit} className="px-3 py-1.5 bg-green-600 hover:bg-green-700 text-white rounded-lg text-sm transition-colors font-medium flex items-center gap-1.5">
+                              <Save className="w-3.5 h-3.5" /> Save
+                            </button>
+                          </div>
                         </div>
                       </td>
-                    </>
-                  ) : (
-                    <>
-                      <td className="py-3 px-4 text-white">{emp.name}</td>
-                      <td className="py-3 px-4 text-gray-400 text-xs">{emp.email}</td>
-                      <td className="py-3 px-4 text-gray-400 text-sm">{emp.sector}</td>
-                      <td className="py-3 px-4">
-                        <span className={`px-2 py-1 rounded-full text-xs ${roleColor(emp.vacationRole ?? 'user')}`}>
-                          {roleLabel(emp.vacationRole ?? 'user')}
-                        </span>
-                      </td>
-                      <td className="py-3 px-4 text-white font-medium">{emp.vacationDaysTotal ?? 20}</td>
-                      <td className="py-3 px-4 text-gray-400">{used}</td>
-                      <td className="py-3 px-4">
-                        <span className={`font-medium ${remaining <= 3 ? 'text-red-400' : remaining <= 7 ? 'text-orange-400' : 'text-green-400'}`}>
-                          {remaining}
-                        </span>
-                      </td>
-                      <td className="py-3 px-4">
-                        <div className="flex gap-1 justify-end">
-                          <IconBtn icon={Edit} color="blue" onClick={() => startEdit(emp)} />
-                          <IconBtn icon={Trash2} color="red" onClick={() => confirm('Delete this employee?') && deleteEmployee(emp.id)} />
-                        </div>
-                      </td>
-                    </>
+                    </tr>
                   )}
-                </tr>
+                </Fragment>
               );
             })}
           </tbody>
@@ -309,25 +352,99 @@ function EmployeesTab() {
 
 // ── Requests Tab ───────────────────────────────────────────────────────────────
 
-async function downloadResenje(req: VacationRequest) {
-  const fmtDate = (d: string) =>
-    new Date(d + 'T00:00:00').toLocaleDateString('sr-Latn-RS', { day: '2-digit', month: '2-digit', year: 'numeric' });
+function nextWorkingDay(dateStr: string): Date {
+  const d = new Date(dateStr + 'T00:00:00');
+  d.setDate(d.getDate() + 1);
+  while (d.getDay() === 0 || d.getDay() === 6) d.setDate(d.getDate() + 1);
+  return d;
+}
+
+function fmtSR(d: Date | string): string {
+  const date = typeof d === 'string' ? new Date(d + 'T00:00:00') : d;
+  return `${String(date.getDate()).padStart(2, '0')}.${String(date.getMonth() + 1).padStart(2, '0')}.${date.getFullYear()}.`;
+}
+
+function p(text: string, opts?: { bold?: boolean; center?: boolean; indent?: number; heading?: typeof HeadingLevel[keyof typeof HeadingLevel] }): Paragraph {
+  return new Paragraph({
+    ...(opts?.heading ? { heading: opts.heading } : {}),
+    alignment: opts?.center ? AlignmentType.CENTER : AlignmentType.LEFT,
+    indent: opts?.indent ? { left: opts.indent } : undefined,
+    children: [new TextRun({ text, bold: opts?.bold })],
+  });
+}
+
+function pMixed(runs: { text: string; bold?: boolean }[], opts?: { indent?: number }): Paragraph {
+  return new Paragraph({
+    indent: opts?.indent ? { left: opts.indent } : undefined,
+    children: runs.map(r => new TextRun({ text: r.text, bold: r.bold })),
+  });
+}
+
+async function downloadResenje(req: VacationRequest, emp: Employee | undefined, remainingDays: number) {
+  const year = new Date(req.startDate + 'T00:00:00').getFullYear();
+  const returnDate = nextWorkingDay(req.endDate);
+  const jobTitle = emp?.jobTitle ?? '___________________';
+  const totalDays = emp?.vacationDaysTotal ?? 20;
 
   const doc = new Document({
+    creator: 'NES Fleet & Leave',
     sections: [{
+      properties: { page: { margin: { top: 1440, right: 1440, bottom: 1440, left: 1440 } } },
       children: [
-        new Paragraph({ text: 'R E Š E N J E', heading: HeadingLevel.HEADING_1, alignment: AlignmentType.CENTER }),
-        new Paragraph({ text: 'o korišćenju godišnjeg odmora', alignment: AlignmentType.CENTER }),
-        new Paragraph({ text: '' }),
-        new Paragraph({ children: [new TextRun({ text: 'Zaposleni: ', bold: true }), new TextRun(req.employeeName)] }),
-        new Paragraph({ children: [new TextRun({ text: 'Sektor: ', bold: true }), new TextRun(req.sector)] }),
-        new Paragraph({ children: [new TextRun({ text: 'Period odmora: ', bold: true }), new TextRun(`${fmtDate(req.startDate)} – ${fmtDate(req.endDate)}`)] }),
-        new Paragraph({ children: [new TextRun({ text: 'Broj radnih dana: ', bold: true }), new TextRun(String(req.daysCount))] }),
-        ...(req.notes ? [new Paragraph({ children: [new TextRun({ text: 'Napomena: ', bold: true }), new TextRun(req.notes)] })] : []),
-        new Paragraph({ text: '' }),
-        new Paragraph({ text: '' }),
-        ...(req.approvedBy ? [new Paragraph({ children: [new TextRun({ text: 'Odobrio: ', bold: true }), new TextRun(req.approvedBy)] })] : []),
-        ...(req.approvedAt ? [new Paragraph({ children: [new TextRun({ text: 'Datum odobrenja: ', bold: true }), new TextRun(new Date(req.approvedAt).toLocaleDateString('sr-Latn-RS'))] })] : []),
+        p('REŠENJE', { heading: HeadingLevel.HEADING_1, center: true }),
+        p(`O KORIŠĆENJU GODIŠNJEG ODMORA ZA ${year}. GODINU`, { bold: true, center: true }),
+        p(''),
+        pMixed([
+          { text: `Zaposleni ` },
+          { text: req.employeeName, bold: true },
+          { text: ` na radnom mestu ` },
+          { text: jobTitle, bold: true },
+          { text: `, utvrđuje se pravo na godišnji odmor za ${year}. godinu, u trajanju od ` },
+          { text: `${totalDays} radnih dana`, bold: true },
+          { text: '.' },
+        ]),
+        p(''),
+        pMixed([
+          { text: 'Prema planu korišćenja godišnjih odmora, zaposleni će koristiti godišnji odmor (u trajanju od ' },
+          { text: `${req.daysCount} radnih dana`, bold: true },
+          { text: ') u periodu od ' },
+          { text: fmtSR(req.startDate), bold: true },
+          { text: ' do ' },
+          { text: fmtSR(req.endDate), bold: true },
+          { text: ' godine, s tim da se na posao javi ' },
+          { text: fmtSR(returnDate), bold: true },
+          { text: ' godine.' },
+        ]),
+        p(''),
+        p('U skladu sa Pravilnikom o radu od 01.05.2019. godine na osnovu člana broj 25, dužina godišnjeg odmora utvrđuje se tako što se zakonski minimum od 20 radnih dana uvećava po osnovu sledećih kriterijuma:'),
+        p('•  Za poslove sa srednjom stručnom spremom - 3 radna dana,', { indent: 360 }),
+        p('•  Za poslove sa višom i visokom stručnom spremom - 4 radna dana.', { indent: 360 }),
+        p('•  Po osnovu staža osiguranja u New Energy Solutions i to:', { indent: 360 }),
+        p('- za staž osiguranja do 3 godine 1 radni dan,', { indent: 720 }),
+        p('- za staž osiguranja od 3 do 5 godina 2 radna dana,', { indent: 720 }),
+        p('- za staž osiguranja od 5 do 15 godina 3 radna dana,', { indent: 720 }),
+        p('- za staž osiguranja od 15 godina 4 radna dana,', { indent: 720 }),
+        p('•  Za roditelje sa decom do 15 godina 1 radni dan,', { indent: 360 }),
+        p('•  Za samohrane roditelje 1 radni dan', { indent: 360 }),
+        p(''),
+        p('Bez obzira na gore navedeno, ukupno trajanje godišnjeg odmora u toku jedne godine ne može biti duže od 27 radnih dana.'),
+        p(''),
+        pMixed([
+          { text: `Ukupan broj preostalih dana za ${year}. godinu počev od ` },
+          { text: fmtSR(returnDate), bold: true },
+          { text: ' iznosi ' },
+          { text: `${remainingDays} dana`, bold: true },
+          { text: '.' },
+        ]),
+        p(''),
+        p('Ovo rešenje je konačno.'),
+        p(''),
+        p('Pouka o pravnom leku: protiv ovog rešenja zaposleni može pokrenuti spor pred nadležnim opštinskim sudom u roku od 90 dana od dana dostavljanja ovog rešenja.'),
+        p(''),
+        p('Dostaviti:'),
+        p('Zaposlenom', { indent: 720 }),
+        p('Knjigovodstvenoj službi', { indent: 720 }),
+        p('Arhivi', { indent: 720 }),
       ],
     }],
   });
@@ -344,7 +461,7 @@ async function downloadResenje(req: VacationRequest) {
 }
 
 function RequestsTab() {
-  const { currentUser, vacationRequests, approveRequest, rejectRequest, deleteRequest } = useVacation();
+  const { currentUser, employees, vacationRequests, approveRequest, rejectRequest, deleteRequest, getRemainingDays } = useVacation();
   const [filter, setFilter] = useState<'all' | 'pending' | 'approved' | 'rejected'>('all');
 
   const isFullAdmin = currentUser.vacationRole === 'admin';
@@ -426,7 +543,7 @@ function RequestsTab() {
                       )}
                       {req.status === 'approved' && (
                         <button
-                          onClick={() => downloadResenje(req)}
+                          onClick={() => downloadResenje(req, employees.find(e => e.id === req.employeeId), getRemainingDays(req.employeeId))}
                           className="flex items-center gap-1 px-2.5 py-1 bg-blue-600/20 border border-blue-600/50 text-blue-400 rounded text-xs hover:bg-blue-600/30 transition-colors whitespace-nowrap"
                         >
                           <FileDown className="w-3 h-3" />

@@ -17,8 +17,17 @@ interface VacationContextType {
   deleteRequest: (id: string) => Promise<void>;
   cancelRequest: (id: string) => Promise<void>;
 
-  updateEmployeeVacation: (id: string, data: { vacationDaysTotal?: number; vacationRole?: string }) => Promise<void>;
-  addEmployee: (data: { name: string; email: string; password: string; sector: string; vacationDaysTotal: number; vacationRole: string }) => Promise<void>;
+  updateEmployeeVacation: (id: string, data: {
+    vacationDaysTotal?: number; vacationRole?: string;
+    jobTitle?: string; educationLevel?: string; nesStartDate?: string;
+    hasChildrenUnder15?: boolean; isSingleParent?: boolean;
+  }) => Promise<void>;
+  addEmployee: (data: {
+    name: string; email: string; password: string; sector: string;
+    vacationDaysTotal: number; vacationRole: string;
+    jobTitle?: string; educationLevel?: string; nesStartDate?: string;
+    hasChildrenUnder15?: boolean; isSingleParent?: boolean;
+  }) => Promise<void>;
   deleteEmployee: (id: string) => Promise<void>;
   changePassword: (currentPwd: string, newPwd: string) => Promise<'ok' | 'wrong-password'>;
 
@@ -44,6 +53,11 @@ const mapEmployee = (row: any): Employee => ({
   role: row.role,
   vacationRole: row.vacation_role ?? 'user',
   vacationDaysTotal: row.vacation_days_total ?? 20,
+  jobTitle: row.job_title ?? undefined,
+  educationLevel: row.education_level ?? undefined,
+  nesStartDate: row.nes_start_date ?? undefined,
+  hasChildrenUnder15: row.has_children_under_15 ?? false,
+  isSingleParent: row.is_single_parent ?? false,
 });
 
 const mapRequest = (row: any): VacationRequest => ({
@@ -219,7 +233,12 @@ export function VacationProvider({ initialUser, onLogout, children }: Props) {
     }
   };
 
-  const addEmployee = async (data: { name: string; email: string; password: string; sector: string; vacationDaysTotal: number; vacationRole: string }) => {
+  const addEmployee = async (data: {
+    name: string; email: string; password: string; sector: string;
+    vacationDaysTotal: number; vacationRole: string;
+    jobTitle?: string; educationLevel?: string; nesStartDate?: string;
+    hasChildrenUnder15?: boolean; isSingleParent?: boolean;
+  }) => {
     const id = Date.now().toString();
     const newEmp = {
       id,
@@ -229,6 +248,11 @@ export function VacationProvider({ initialUser, onLogout, children }: Props) {
       role: 'user' as const,
       vacationRole: data.vacationRole as any,
       vacationDaysTotal: data.vacationDaysTotal,
+      jobTitle: data.jobTitle,
+      educationLevel: data.educationLevel as any,
+      nesStartDate: data.nesStartDate,
+      hasChildrenUnder15: data.hasChildrenUnder15 ?? false,
+      isSingleParent: data.isSingleParent ?? false,
     };
     setEmployees(p => [...p, newEmp]);
     const { error } = await supabase.from('employees').insert({
@@ -240,6 +264,11 @@ export function VacationProvider({ initialUser, onLogout, children }: Props) {
       role: 'user',
       vacation_role: data.vacationRole,
       vacation_days_total: data.vacationDaysTotal,
+      job_title: data.jobTitle ?? null,
+      education_level: data.educationLevel ?? null,
+      nes_start_date: data.nesStartDate || null,
+      has_children_under_15: data.hasChildrenUnder15 ?? false,
+      is_single_parent: data.isSingleParent ?? false,
     });
     if (error) {
       setEmployees(p => p.filter(e => e.id !== id));
@@ -272,16 +301,22 @@ export function VacationProvider({ initialUser, onLogout, children }: Props) {
     return 'ok';
   };
 
-  const updateEmployeeVacation = async (id: string, data: { vacationDaysTotal?: number; vacationRole?: string }) => {
+  const updateEmployeeVacation = async (id: string, data: {
+    vacationDaysTotal?: number; vacationRole?: string;
+    jobTitle?: string; educationLevel?: string; nesStartDate?: string;
+    hasChildrenUnder15?: boolean; isSingleParent?: boolean;
+  }) => {
     const prev = employees.find(e => e.id === id);
-    setEmployees(p => p.map(e => e.id === id
-      ? { ...e, vacationDaysTotal: data.vacationDaysTotal ?? e.vacationDaysTotal, vacationRole: (data.vacationRole as any) ?? e.vacationRole }
-      : e
-    ));
+    setEmployees(p => p.map(e => e.id === id ? { ...e, ...data, vacationRole: (data.vacationRole as any) ?? e.vacationRole } : e));
 
     const updates: any = {};
     if (data.vacationDaysTotal !== undefined) updates.vacation_days_total = data.vacationDaysTotal;
     if (data.vacationRole !== undefined) updates.vacation_role = data.vacationRole;
+    if (data.jobTitle !== undefined) updates.job_title = data.jobTitle || null;
+    if (data.educationLevel !== undefined) updates.education_level = data.educationLevel || null;
+    if (data.nesStartDate !== undefined) updates.nes_start_date = data.nesStartDate || null;
+    if (data.hasChildrenUnder15 !== undefined) updates.has_children_under_15 = data.hasChildrenUnder15;
+    if (data.isSingleParent !== undefined) updates.is_single_parent = data.isSingleParent;
 
     const { error } = await supabase.from('employees').update(updates).eq('id', id);
     if (error) {

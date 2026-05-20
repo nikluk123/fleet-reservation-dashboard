@@ -42,6 +42,11 @@ export interface Employee {
   role: 'user' | 'admin';
   vacationRole?: 'user' | 'sector_admin' | 'admin';
   vacationDaysTotal?: number;
+  jobTitle?: string;
+  educationLevel?: 'SSS' | 'VSS';
+  nesStartDate?: string;
+  hasChildrenUnder15?: boolean;
+  isSingleParent?: boolean;
 }
 
 // Returns date string for current week: offset 0=Mon, 1=Tue, ..., 6=Sun
