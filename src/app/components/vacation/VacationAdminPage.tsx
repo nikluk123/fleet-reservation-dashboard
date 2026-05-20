@@ -1,7 +1,10 @@
 import { useState, Fragment } from 'react';
 import { Save, X, CheckCircle, Clock, XCircle, Trash2, Edit, Plus, UserPlus, Download, FileDown, RefreshCw } from 'lucide-react';
 import * as XLSX from 'xlsx';
-import { Document, Packer, Paragraph, TextRun, HeadingLevel, AlignmentType } from 'docx';
+import {
+  Document, Packer, Paragraph, TextRun, AlignmentType,
+  ImageRun, Table, TableRow, TableCell, WidthType, BorderStyle,
+} from 'docx';
 import { calcVacationDays } from '../../data/vacationTypes';
 import { useVacation } from '../../context/VacationContext';
 import { type VacationRequest } from '../../data/vacationTypes';
@@ -381,19 +384,47 @@ function fmtSR(d: Date | string): string {
   return `${String(date.getDate()).padStart(2, '0')}.${String(date.getMonth() + 1).padStart(2, '0')}.${date.getFullYear()}.`;
 }
 
-function p(text: string, opts?: { bold?: boolean; center?: boolean; indent?: number; heading?: typeof HeadingLevel[keyof typeof HeadingLevel] }): Paragraph {
+const FONT = 'Calibri';
+const SZ = 21; // 10.5pt in half-points
+const NO_BORDER = { style: BorderStyle.NONE, size: 0, color: 'FFFFFF' } as const;
+
+function tr(text: string, bold = false): TextRun {
+  return new TextRun({ text, font: FONT, size: SZ, bold });
+}
+
+function body(runs: TextRun[], opts: { center?: boolean; indent?: number; spaceAfter?: number } = {}): Paragraph {
   return new Paragraph({
-    ...(opts?.heading ? { heading: opts.heading } : {}),
-    alignment: opts?.center ? AlignmentType.CENTER : AlignmentType.LEFT,
-    indent: opts?.indent ? { left: opts.indent } : undefined,
-    children: [new TextRun({ text, bold: opts?.bold })],
+    alignment: opts.center ? AlignmentType.CENTER : AlignmentType.BOTH,
+    indent: opts.indent !== undefined ? { left: opts.indent } : { right: -540 },
+    spacing: { after: opts.spaceAfter ?? 160 },
+    children: runs,
   });
 }
 
-function pMixed(runs: { text: string; bold?: boolean }[], opts?: { indent?: number }): Paragraph {
+function bullet(text: string): Paragraph {
   return new Paragraph({
-    indent: opts?.indent ? { left: opts.indent } : undefined,
-    children: runs.map(r => new TextRun({ text: r.text, bold: r.bold })),
+    alignment: AlignmentType.BOTH,
+    indent: { left: 720, hanging: 360, right: -540 },
+    spacing: { after: 0, line: 240, lineRule: 'auto' as any },
+    children: [tr('•  ' + text)],
+  });
+}
+
+function subBullet(text: string): Paragraph {
+  return new Paragraph({
+    alignment: AlignmentType.BOTH,
+    indent: { left: 1080, right: -540 },
+    spacing: { after: 0, line: 240, lineRule: 'auto' as any },
+    children: [tr(text)],
+  });
+}
+
+function dostaviti(text: string): Paragraph {
+  return new Paragraph({
+    alignment: AlignmentType.LEFT,
+    indent: { left: 360, right: -540 },
+    spacing: { after: 0, line: 240, lineRule: 'auto' as any },
+    children: [tr(text)],
   });
 }
 
@@ -404,66 +435,131 @@ async function downloadResenje(req: VacationRequest, emp: Employee | undefined, 
   const totalDays = (emp?.educationLevel || emp?.nesStartDate)
     ? calcVacationDays(emp!)
     : (emp?.vacationDaysTotal ?? 20);
+  const docDate = req.approvedAt ? fmtSR(new Date(req.approvedAt)) : fmtSR(new Date());
+  const approverName = req.approvedBy ?? 'Miloš Colić';
+
+  // Fetch logo
+  let logoImage: Uint8Array | undefined;
+  try {
+    const resp = await fetch('/logo.png');
+    logoImage = new Uint8Array(await resp.arrayBuffer());
+  } catch { /* skip logo if unavailable */ }
+
+  // Signature table: date left | line + name + title right
+  const sigTable = new Table({
+    width: { size: 100, type: WidthType.PERCENTAGE },
+    borders: { top: NO_BORDER, bottom: NO_BORDER, left: NO_BORDER, right: NO_BORDER, insideH: NO_BORDER, insideV: NO_BORDER },
+    rows: [
+      new TableRow({
+        children: [
+          new TableCell({
+            width: { size: 55, type: WidthType.PERCENTAGE },
+            borders: { top: NO_BORDER, bottom: NO_BORDER, left: NO_BORDER, right: NO_BORDER },
+            children: [new Paragraph({ children: [tr(`U Beogradu, ${docDate} godine`)] })],
+          }),
+          new TableCell({
+            width: { size: 45, type: WidthType.PERCENTAGE },
+            borders: {
+              top: { style: BorderStyle.SINGLE, size: 6, color: '000000' },
+              bottom: NO_BORDER, left: NO_BORDER, right: NO_BORDER,
+            },
+            children: [
+              new Paragraph({ alignment: AlignmentType.CENTER, spacing: { before: 60 }, children: [tr(approverName)] }),
+              new Paragraph({ alignment: AlignmentType.CENTER, children: [tr('Direktor')] }),
+            ],
+          }),
+        ],
+      }),
+    ],
+  });
 
   const doc = new Document({
     creator: 'NES Fleet & Leave',
     sections: [{
-      properties: { page: { margin: { top: 1440, right: 1440, bottom: 1440, left: 1440 } } },
+      properties: { page: { margin: { top: 90, right: 1440, bottom: 1440, left: 1440 } } },
       children: [
-        p('REŠENJE', { heading: HeadingLevel.HEADING_1, center: true }),
-        p(`O KORIŠĆENJU GODIŠNJEG ODMORA ZA ${year}. GODINU`, { bold: true, center: true }),
-        p(''),
-        pMixed([
-          { text: `Zaposleni ` },
-          { text: req.employeeName, bold: true },
-          { text: ` na radnom mestu ` },
-          { text: jobTitle, bold: true },
-          { text: `, utvrđuje se pravo na godišnji odmor za ${year}. godinu, u trajanju od ` },
-          { text: `${totalDays} radnih dana`, bold: true },
-          { text: '.' },
+        // Logo top-right
+        ...(logoImage ? [new Paragraph({
+          alignment: AlignmentType.RIGHT,
+          spacing: { after: 200 },
+          children: [new ImageRun({ data: logoImage, transformation: { width: 172, height: 106 } })],
+        })] : [new Paragraph({ children: [tr('')], spacing: { after: 200 } })]),
+
+        // Legal preamble
+        body([
+          tr('Na osnovu člana 68. do 70. i 75. Zakona o radu („Sl. glasnik RS“, br. 24/2005, 61/2005, 32/2013 i 75/2014), a u skladu s ugovorom o radu, Generalni direktor, '),
+          tr('NEW ENERGY SOLUTIONS DOO'),
+          tr(` Tošin bunar 270, 11000, Beograd-Novi Beograd, Srbija, ${approverName}, donosi:`),
         ]),
-        p(''),
-        pMixed([
-          { text: 'Prema planu korišćenja godišnjih odmora, zaposleni će koristiti godišnji odmor (u trajanju od ' },
-          { text: `${req.daysCount} radnih dana`, bold: true },
-          { text: ') u periodu od ' },
-          { text: fmtSR(req.startDate), bold: true },
-          { text: ' do ' },
-          { text: fmtSR(req.endDate), bold: true },
-          { text: ' godine, s tim da se na posao javi ' },
-          { text: fmtSR(returnDate), bold: true },
-          { text: ' godine.' },
+
+        // REŠENJE title
+        new Paragraph({
+          alignment: AlignmentType.LEFT,
+          indent: { left: 2880, firstLine: 1080 },
+          spacing: { after: 60 },
+          children: [tr('REŠENJE', true), new TextRun({ text: '       ', font: FONT, size: SZ })],
+        }),
+
+        // Subtitle
+        body([tr(`O KORIŠĆENJU GODIŠNJEG ODMORA ZA ${year}. GODINU`, true)], { center: true, spaceAfter: 240 }),
+
+        // First paragraph
+        body([
+          tr(` Zaposleni `), tr(req.employeeName),
+          tr(' na radnom mestu '), tr(jobTitle),
+          tr(`, utvrđuje se pravo na godišnji odmor za ${year}. godinu, u trajanju od `),
+          tr(`${totalDays} radnih dana`), tr('.'),
         ]),
-        p(''),
-        p('U skladu sa Pravilnikom o radu od 01.05.2019. godine na osnovu člana broj 25, dužina godišnjeg odmora utvrđuje se tako što se zakonski minimum od 20 radnih dana uvećava po osnovu sledećih kriterijuma:'),
-        p('•  Za poslove sa srednjom stručnom spremom - 3 radna dana,', { indent: 360 }),
-        p('•  Za poslove sa višom i visokom stručnom spremom - 4 radna dana.', { indent: 360 }),
-        p('•  Po osnovu staža osiguranja u New Energy Solutions i to:', { indent: 360 }),
-        p('- za staž osiguranja do 3 godine 1 radni dan,', { indent: 720 }),
-        p('- za staž osiguranja od 3 do 5 godina 2 radna dana,', { indent: 720 }),
-        p('- za staž osiguranja od 5 do 15 godina 3 radna dana,', { indent: 720 }),
-        p('- za staž osiguranja od 15 godina 4 radna dana,', { indent: 720 }),
-        p('•  Za roditelje sa decom do 15 godina 1 radni dan,', { indent: 360 }),
-        p('•  Za samohrane roditelje 1 radni dan', { indent: 360 }),
-        p(''),
-        p('Bez obzira na gore navedeno, ukupno trajanje godišnjeg odmora u toku jedne godine ne može biti duže od 27 radnih dana.'),
-        p(''),
-        pMixed([
-          { text: `Ukupan broj preostalih dana za ${year}. godinu počev od ` },
-          { text: fmtSR(returnDate), bold: true },
-          { text: ' iznosi ' },
-          { text: `${remainingDays} dana`, bold: true },
-          { text: '.' },
+
+        // Second paragraph
+        body([
+          tr(` Prema planu korišćenja godišnjih odmora, zaposleni će koristiti godišnji odmor (u trajanju od `),
+          tr(`${req.daysCount} radnih dana`),
+          tr(') u periodu od '), tr(fmtSR(req.startDate)),
+          tr(' do '), tr(fmtSR(req.endDate)),
+          tr(' godine, s tim da se na posao javi '), tr(fmtSR(returnDate)),
+          tr(' godine.'),
         ]),
-        p(''),
-        p('Ovo rešenje je konačno.'),
-        p(''),
-        p('Pouka o pravnom leku: protiv ovog rešenja zaposleni može pokrenuti spor pred nadležnim opštinskim sudom u roku od 90 dana od dana dostavljanja ovog rešenja.'),
-        p(''),
-        p('Dostaviti:'),
-        p('Zaposlenom', { indent: 720 }),
-        p('Knjigovodstvenoj službi', { indent: 720 }),
-        p('Arhivi', { indent: 720 }),
+
+        // Pravilnik
+        body([tr('U skladu sa Pravilnikom o radu od 01.05.2019. godine na osnovu člana broj 25, dužina godišnjeg odmora utvrđuje se tako što se zakonski minimum od 20 radnih dana uvećava po osnovu sledećih kriterijuma:')], { spaceAfter: 60 }),
+
+        bullet('Za poslove sa srednjom stručnom spremom - 3 radna dana,'),
+        bullet('Za poslove sa višom i visokom stručnom spremom - 4 radna dana.'),
+        bullet('Po osnovu staža osiguranja u New Energy Solutions i to:'),
+        subBullet('- za staž osiguranja do 3 godine 1 radni dan,'),
+        subBullet('- za staž osiguranja od 3 do 5 godina 2 radna dana,'),
+        subBullet('- za staž osiguranja od 5 do 15 godina 3 radna dana,'),
+        subBullet('- za staž osiguranja od 15 godina 4 radna dana,'),
+        bullet('Za roditelje sa decom do 15 godina 1 radni dan,'),
+        bullet('Za samohrane roditelje 1 radni dan'),
+
+        new Paragraph({ children: [tr('')], spacing: { after: 80 } }),
+
+        body([tr('Bez obzira na gore navedeno, ukupno trajanje godišnjeg odmora u toku jedne godine ne može biti duže od 27 radnih dana.')]),
+
+        // Remaining + finality in one paragraph
+        body([
+          tr(`Ukupan broj preostalih dana za ${year}. godinu počev od `),
+          tr(fmtSR(returnDate)), tr(' iznosi '), tr(`${remainingDays} dana`), tr('. '),
+          tr('Ovo rešenje je konačno', true), tr('.'),
+        ]),
+
+        new Paragraph({ children: [tr('')], spacing: { after: 80 } }),
+
+        // Legal notice
+        body([tr('Pouka o pravnom leku', true), tr(': protiv ovog rešenja zaposleni može pokrenuti spor pred nadležnim opštinskim sudom u roku od 90 dana od dana dostavljanja ovog rešenja.')]),
+
+        // Dostaviti
+        body([tr('Dostaviti', true), tr(':')], { spaceAfter: 40 }),
+        dostaviti('Zaposlenom'),
+        dostaviti('Knjigovodstvenoj službi'),
+        dostaviti('Arhivi'),
+
+        new Paragraph({ children: [tr('')], spacing: { after: 400 } }),
+
+        // Signature
+        sigTable,
       ],
     }],
   });
