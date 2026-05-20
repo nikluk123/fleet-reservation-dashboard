@@ -1,6 +1,7 @@
 import { useState } from 'react';
-import { Save, X, CheckCircle, Clock, XCircle, Trash2, Edit, Plus, UserPlus, Download } from 'lucide-react';
+import { Save, X, CheckCircle, Clock, XCircle, Trash2, Edit, Plus, UserPlus, Download, FileDown } from 'lucide-react';
 import * as XLSX from 'xlsx';
+import { Document, Packer, Paragraph, TextRun, HeadingLevel, AlignmentType } from 'docx';
 import { useVacation } from '../../context/VacationContext';
 import { type VacationRequest } from '../../data/vacationTypes';
 import { type Employee } from '../../data/mockData';
@@ -308,8 +309,42 @@ function EmployeesTab() {
 
 // ── Requests Tab ───────────────────────────────────────────────────────────────
 
+async function downloadResenje(req: VacationRequest) {
+  const fmtDate = (d: string) =>
+    new Date(d + 'T00:00:00').toLocaleDateString('sr-Latn-RS', { day: '2-digit', month: '2-digit', year: 'numeric' });
+
+  const doc = new Document({
+    sections: [{
+      children: [
+        new Paragraph({ text: 'R E Š E N J E', heading: HeadingLevel.HEADING_1, alignment: AlignmentType.CENTER }),
+        new Paragraph({ text: 'o korišćenju godišnjeg odmora', alignment: AlignmentType.CENTER }),
+        new Paragraph({ text: '' }),
+        new Paragraph({ children: [new TextRun({ text: 'Zaposleni: ', bold: true }), new TextRun(req.employeeName)] }),
+        new Paragraph({ children: [new TextRun({ text: 'Sektor: ', bold: true }), new TextRun(req.sector)] }),
+        new Paragraph({ children: [new TextRun({ text: 'Period odmora: ', bold: true }), new TextRun(`${fmtDate(req.startDate)} – ${fmtDate(req.endDate)}`)] }),
+        new Paragraph({ children: [new TextRun({ text: 'Broj radnih dana: ', bold: true }), new TextRun(String(req.daysCount))] }),
+        ...(req.notes ? [new Paragraph({ children: [new TextRun({ text: 'Napomena: ', bold: true }), new TextRun(req.notes)] })] : []),
+        new Paragraph({ text: '' }),
+        new Paragraph({ text: '' }),
+        ...(req.approvedBy ? [new Paragraph({ children: [new TextRun({ text: 'Odobrio: ', bold: true }), new TextRun(req.approvedBy)] })] : []),
+        ...(req.approvedAt ? [new Paragraph({ children: [new TextRun({ text: 'Datum odobrenja: ', bold: true }), new TextRun(new Date(req.approvedAt).toLocaleDateString('sr-Latn-RS'))] })] : []),
+      ],
+    }],
+  });
+
+  const blob = await Packer.toBlob(doc);
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `Resenje_${req.employeeName.replace(/\s+/g, '_')}_${req.startDate}.docx`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+
 function RequestsTab() {
-  const { currentUser, employees, vacationRequests, approveRequest, rejectRequest, deleteRequest } = useVacation();
+  const { currentUser, vacationRequests, approveRequest, rejectRequest, deleteRequest } = useVacation();
   const [filter, setFilter] = useState<'all' | 'pending' | 'approved' | 'rejected'>('all');
 
   const isFullAdmin = currentUser.vacationRole === 'admin';
@@ -323,13 +358,13 @@ function RequestsTab() {
     return true;
   });
 
-  const getStatusIcon = (status: string) => {
-    if (status === 'approved') return <CheckCircle className="w-4 h-4 text-green-500" />;
-    if (status === 'pending')  return <Clock className="w-4 h-4 text-orange-500" />;
-    return <XCircle className="w-4 h-4 text-red-500" />;
-  };
+  const fmt = (d: string) => new Date(d + 'T00:00:00').toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
 
-  const fmt = (d: string) => new Date(d + 'T00:00:00').toLocaleDateString('en-GB', { dateStyle: 'medium' });
+  const statusBadge = (status: string) => {
+    if (status === 'approved') return <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs bg-green-500/15 text-green-400 whitespace-nowrap"><CheckCircle className="w-3 h-3" />Approved</span>;
+    if (status === 'pending')  return <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs bg-orange-500/15 text-orange-400 whitespace-nowrap"><Clock className="w-3 h-3" />Pending</span>;
+    return <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs bg-red-500/15 text-red-400 whitespace-nowrap"><XCircle className="w-3 h-3" />Rejected</span>;
+  };
 
   return (
     <div>
@@ -350,48 +385,65 @@ function RequestsTab() {
         </div>
       </div>
 
-      <div className="space-y-3">
-        {visible.length === 0 && <p className="text-gray-400 text-sm">No requests found.</p>}
-        {visible.map(req => {
-          const emp = employees.find(e => e.id === req.employeeId);
-          return (
-            <div key={req.id} className="bg-app-bg border border-app-line-muted rounded-lg p-4 flex items-center justify-between gap-4">
-              <div className="flex items-center gap-3 min-w-0">
-                {getStatusIcon(req.status)}
-                <div className="min-w-0">
-                  <p className="text-white font-medium truncate">
-                    {req.employeeName} — {req.daysCount} days
-                  </p>
-                  <p className="text-gray-400 text-xs">{req.sector}</p>
-                  <p className="text-gray-500 text-xs mt-0.5">
-                    {fmt(req.startDate)} → {fmt(req.endDate)}
-                  </p>
-                  {req.notes && <p className="text-gray-600 text-xs mt-0.5 italic">"{req.notes}"</p>}
-                </div>
-              </div>
-
-              <div className="flex items-center gap-2 flex-shrink-0">
-                {req.status === 'pending' && (
-                  <>
-                    <button onClick={() => approveRequest(req.id)} className="px-3 py-1.5 bg-green-600/20 border border-green-600/50 text-green-400 rounded-lg text-sm hover:bg-green-600/30 transition-colors">
-                      Approve
-                    </button>
-                    <button onClick={() => rejectRequest(req.id)} className="px-3 py-1.5 bg-red-600/20 border border-red-600/50 text-red-400 rounded-lg text-sm hover:bg-red-600/30 transition-colors">
-                      Reject
-                    </button>
-                  </>
-                )}
-                {req.status === 'approved' && req.approvedBy && (
-                  <p className="text-gray-500 text-xs">Approved by {req.approvedBy}</p>
-                )}
-                {isFullAdmin && (
-                  <IconBtn icon={Trash2} color="red" onClick={() => confirm('Delete this request?') && deleteRequest(req.id)} />
-                )}
-              </div>
-            </div>
-          );
-        })}
-      </div>
+      {visible.length === 0 ? (
+        <p className="text-gray-400 text-sm py-4">No requests found.</p>
+      ) : (
+        <div className="overflow-x-auto">
+          <table className="w-full text-sm">
+            <thead>
+              <tr className="border-b border-app-line">
+                <th className="text-left text-gray-400 font-medium py-2.5 px-3 whitespace-nowrap">Status</th>
+                <th className="text-left text-gray-400 font-medium py-2.5 px-3">Employee</th>
+                <th className="text-left text-gray-400 font-medium py-2.5 px-3">Sector</th>
+                <th className="text-left text-gray-400 font-medium py-2.5 px-3 whitespace-nowrap">Period</th>
+                <th className="text-left text-gray-400 font-medium py-2.5 px-3">Days</th>
+                <th className="text-left text-gray-400 font-medium py-2.5 px-3">Notes</th>
+                <th className="text-left text-gray-400 font-medium py-2.5 px-3 whitespace-nowrap">Approved by</th>
+                <th className="text-right text-gray-400 font-medium py-2.5 px-3">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {visible.map(req => (
+                <tr key={req.id} className="border-b border-app-line/50 hover:bg-app-hover/20">
+                  <td className="py-2.5 px-3">{statusBadge(req.status)}</td>
+                  <td className="py-2.5 px-3 text-white font-medium whitespace-nowrap">{req.employeeName}</td>
+                  <td className="py-2.5 px-3 text-gray-400 text-xs">{req.sector}</td>
+                  <td className="py-2.5 px-3 text-gray-300 whitespace-nowrap">{fmt(req.startDate)} – {fmt(req.endDate)}</td>
+                  <td className="py-2.5 px-3 text-white font-medium">{req.daysCount}</td>
+                  <td className="py-2.5 px-3 text-gray-500 text-xs max-w-[140px] truncate italic">{req.notes || '—'}</td>
+                  <td className="py-2.5 px-3 text-gray-400 text-xs whitespace-nowrap">{req.approvedBy || '—'}</td>
+                  <td className="py-2.5 px-3">
+                    <div className="flex items-center gap-1 justify-end">
+                      {req.status === 'pending' && (
+                        <>
+                          <button onClick={() => approveRequest(req.id)} className="px-2.5 py-1 bg-green-600/20 border border-green-600/50 text-green-400 rounded text-xs hover:bg-green-600/30 transition-colors">
+                            Approve
+                          </button>
+                          <button onClick={() => rejectRequest(req.id)} className="px-2.5 py-1 bg-red-600/20 border border-red-600/50 text-red-400 rounded text-xs hover:bg-red-600/30 transition-colors">
+                            Reject
+                          </button>
+                        </>
+                      )}
+                      {req.status === 'approved' && (
+                        <button
+                          onClick={() => downloadResenje(req)}
+                          className="flex items-center gap-1 px-2.5 py-1 bg-blue-600/20 border border-blue-600/50 text-blue-400 rounded text-xs hover:bg-blue-600/30 transition-colors whitespace-nowrap"
+                        >
+                          <FileDown className="w-3 h-3" />
+                          Rešenje
+                        </button>
+                      )}
+                      {isFullAdmin && (
+                        <IconBtn icon={Trash2} color="red" onClick={() => confirm('Delete this request?') && deleteRequest(req.id)} />
+                      )}
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
     </div>
   );
 }
