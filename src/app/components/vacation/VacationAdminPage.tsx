@@ -260,7 +260,24 @@ function EmployeesTab() {
                   <tr className="border-b border-app-line hover:bg-app-hover/20">
                     <td className="py-3 px-4">
                       <p className="text-white">{emp.name}</p>
-                      {emp.jobTitle && <p className="text-gray-500 text-xs mt-0.5">{emp.jobTitle}</p>}
+                      {emp.jobTitle
+                        ? <p className="text-gray-500 text-xs mt-0.5">{emp.jobTitle}</p>
+                        : <p className="text-gray-600 text-xs mt-0.5 italic">radno mesto nije uneto</p>
+                      }
+                      <div className="flex flex-wrap gap-1 mt-1.5">
+                        {emp.educationLevel
+                          ? <span className="px-1.5 py-0.5 rounded text-xs bg-blue-500/10 text-blue-400">{emp.educationLevel}</span>
+                          : <span className="px-1.5 py-0.5 rounded text-xs bg-gray-500/10 text-gray-600">SS?</span>
+                        }
+                        {emp.nesStartDate
+                          ? <span className="px-1.5 py-0.5 rounded text-xs bg-gray-500/10 text-gray-400">
+                              {Math.floor((Date.now() - new Date(emp.nesStartDate).getTime()) / (365.25 * 24 * 3600 * 1000))}g NES
+                            </span>
+                          : <span className="px-1.5 py-0.5 rounded text-xs bg-gray-500/10 text-gray-600">staž?</span>
+                        }
+                        {emp.hasChildrenUnder15 && <span className="px-1.5 py-0.5 rounded text-xs bg-gray-500/10 text-gray-400">deca &lt;15g</span>}
+                        {emp.isSingleParent && <span className="px-1.5 py-0.5 rounded text-xs bg-gray-500/10 text-gray-400">sam. roditelj</span>}
+                      </div>
                     </td>
                     <td className="py-3 px-4 text-gray-400 text-xs">{emp.email}</td>
                     <td className="py-3 px-4 text-gray-400 text-sm">{emp.sector}</td>
