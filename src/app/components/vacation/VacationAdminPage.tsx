@@ -386,6 +386,8 @@ function fmtSR(d: Date | string): string {
 
 const FONT = 'Calibri';
 const SZ = 21; // 10.5pt in half-points
+const LINE_115 = 276; // 1.15 line spacing (276 = 240 × 1.15)
+const DIRECTOR = 'Miloš Colić';
 const NO_BORDER = { style: BorderStyle.NONE, size: 0, color: 'FFFFFF' } as const;
 
 function tr(text: string, bold = false): TextRun {
@@ -396,7 +398,7 @@ function body(runs: TextRun[], opts: { center?: boolean; indent?: number; spaceA
   return new Paragraph({
     alignment: opts.center ? AlignmentType.CENTER : AlignmentType.BOTH,
     indent: opts.indent !== undefined ? { left: opts.indent } : { right: -540 },
-    spacing: { after: opts.spaceAfter ?? 160 },
+    spacing: { after: opts.spaceAfter ?? 160, line: LINE_115, lineRule: 'auto' as any },
     children: runs,
   });
 }
@@ -405,7 +407,7 @@ function bullet(text: string): Paragraph {
   return new Paragraph({
     alignment: AlignmentType.BOTH,
     indent: { left: 720, hanging: 360, right: -540 },
-    spacing: { after: 0, line: 240, lineRule: 'auto' as any },
+    spacing: { after: 0, line: LINE_115, lineRule: 'auto' as any },
     children: [tr('•  ' + text)],
   });
 }
@@ -414,7 +416,7 @@ function subBullet(text: string): Paragraph {
   return new Paragraph({
     alignment: AlignmentType.BOTH,
     indent: { left: 1080, right: -540 },
-    spacing: { after: 0, line: 240, lineRule: 'auto' as any },
+    spacing: { after: 0, line: LINE_115, lineRule: 'auto' as any },
     children: [tr(text)],
   });
 }
@@ -422,9 +424,9 @@ function subBullet(text: string): Paragraph {
 function dostaviti(text: string): Paragraph {
   return new Paragraph({
     alignment: AlignmentType.LEFT,
-    indent: { left: 360, right: -540 },
-    spacing: { after: 0, line: 240, lineRule: 'auto' as any },
-    children: [tr(text)],
+    indent: { left: 720, hanging: 360, right: -540 },
+    spacing: { after: 0, line: LINE_115, lineRule: 'auto' as any },
+    children: [tr('•  ' + text)],
   });
 }
 
@@ -436,12 +438,11 @@ async function downloadResenje(req: VacationRequest, emp: Employee | undefined, 
     ? calcVacationDays(emp!)
     : (emp?.vacationDaysTotal ?? 20);
   const docDate = req.approvedAt ? fmtSR(new Date(req.approvedAt)) : fmtSR(new Date());
-  const approverName = req.approvedBy ?? 'Miloš Colić';
 
   // Fetch logo
   let logoImage: Uint8Array | undefined;
   try {
-    const resp = await fetch('/logo.png');
+    const resp = await fetch('/logo.jpg');
     logoImage = new Uint8Array(await resp.arrayBuffer());
   } catch { /* skip logo if unavailable */ }
 
@@ -464,7 +465,7 @@ async function downloadResenje(req: VacationRequest, emp: Employee | undefined, 
               bottom: NO_BORDER, left: NO_BORDER, right: NO_BORDER,
             },
             children: [
-              new Paragraph({ alignment: AlignmentType.CENTER, spacing: { before: 60 }, children: [tr(approverName)] }),
+              new Paragraph({ alignment: AlignmentType.CENTER, spacing: { before: 60 }, children: [tr(DIRECTOR)] }),
               new Paragraph({ alignment: AlignmentType.CENTER, children: [tr('Direktor')] }),
             ],
           }),
@@ -481,23 +482,23 @@ async function downloadResenje(req: VacationRequest, emp: Employee | undefined, 
         // Logo top-right
         ...(logoImage ? [new Paragraph({
           alignment: AlignmentType.RIGHT,
-          spacing: { after: 200 },
-          children: [new ImageRun({ data: logoImage, transformation: { width: 172, height: 106 } })],
+          spacing: { after: 200, line: LINE_115, lineRule: 'auto' as any },
+          children: [new ImageRun({ data: logoImage, transformation: { width: 180, height: 110 } })],
         })] : [new Paragraph({ children: [tr('')], spacing: { after: 200 } })]),
 
         // Legal preamble
-        body([
-          tr('Na osnovu člana 68. do 70. i 75. Zakona o radu („Sl. glasnik RS“, br. 24/2005, 61/2005, 32/2013 i 75/2014), a u skladu s ugovorom o radu, Generalni direktor, '),
-          tr('NEW ENERGY SOLUTIONS DOO'),
-          tr(` Tošin bunar 270, 11000, Beograd-Novi Beograd, Srbija, ${approverName}, donosi:`),
-        ]),
+        body([tr('Na osnovu člana 68. do 70. i 75. Zakona o radu („Sl. glasnik RS”, br. 24/2005, 61/2005, 32/2013 i 75/2014), a u skladu s ugovorom o radu,')]),
+        body([tr(`Generalni direktor, NEW ENERGY SOLUTIONS DOO Tošin bunar 270, 11000, Beograd-Novi Beograd, Srbija, ${DIRECTOR}, donosi:`)]),
+
+        // Empty line before REŠENJE
+        new Paragraph({ children: [tr('')], spacing: { after: 0, line: LINE_115, lineRule: 'auto' as any } }),
 
         // REŠENJE title
         new Paragraph({
           alignment: AlignmentType.LEFT,
           indent: { left: 2880, firstLine: 1080 },
-          spacing: { after: 60 },
-          children: [tr('REŠENJE', true), new TextRun({ text: '       ', font: FONT, size: SZ })],
+          spacing: { after: 60, line: LINE_115, lineRule: 'auto' as any },
+          children: [new TextRun({ text: 'REŠENJE', font: FONT, size: 36, bold: true })],
         }),
 
         // Subtitle
