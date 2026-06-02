@@ -5,6 +5,7 @@ import {
   type Employee,
   type Department,
   type Project,
+  type InventoryItem,
 } from '../data/mockData';
 import { supabase } from '../../lib/supabaseClient';
 import { notifyAdminsNewRequest, notifyUserStatusChange } from '../../lib/emailService';
@@ -24,8 +25,13 @@ interface FleetContextType {
   employees: Employee[];
   projects: Project[];
   departments: Department[];
+  inventoryItems: InventoryItem[];
   currentUser: Employee;
   activities: Activity[];
+
+  addInventoryItem: (item: Omit<InventoryItem, 'id'>) => void;
+  updateInventoryItem: (id: string, item: Partial<InventoryItem>) => void;
+  deleteInventoryItem: (id: string) => void;
 
   addVehicle: (vehicle: Omit<Vehicle, 'id'>) => void;
   updateVehicle: (id: string, vehicle: Partial<Vehicle>) => void;
@@ -80,6 +86,7 @@ const mapEmployee = (row: any): Employee => ({
   role: row.role,
   vacationRole: row.vacation_role ?? 'user',
   vacationDaysTotal: row.vacation_days_total ?? 20,
+  inventoryRole: row.inventory_role ?? 'user',
 });
 
 const mapProject = (row: any): Project => ({
@@ -108,6 +115,26 @@ const mapReservation = (row: any): Reservation => ({
   approvedAt: row.approved_at ?? undefined,
 });
 
+const mapInventoryItem = (row: any): InventoryItem => ({
+  id: row.id,
+  barcodeId: row.barcode_id,
+  category: row.category,
+  itemType: row.item_type,
+  manufacturer: row.manufacturer ?? undefined,
+  model: row.model ?? undefined,
+  serialNumber: row.serial_number ?? undefined,
+  year: row.year ?? undefined,
+  condition: row.condition ?? 'ISPRAVNO',
+  department: row.department ?? undefined,
+  employeeName: row.employee_name ?? undefined,
+  location: row.location ?? undefined,
+  notes: row.notes ?? undefined,
+  assignedDate: row.assigned_date ?? undefined,
+  material: row.material ?? undefined,
+  colorDesc: row.color_desc ?? undefined,
+  dimensions: row.dimensions ?? undefined,
+});
+
 // ─────────────────────────────────────────────────────────────────────────────
 
 export function FleetProvider({ children, initialUser }: { children: ReactNode; initialUser: Employee }) {
@@ -116,6 +143,7 @@ export function FleetProvider({ children, initialUser }: { children: ReactNode; 
   const [employees, setEmployees] = useState<Employee[]>([]);
   const [projects, setProjects] = useState<Project[]>([]);
   const [departments, setDepartments] = useState<Department[]>([]);
+  const [inventoryItems, setInventoryItems] = useState<InventoryItem[]>([]);
   const [currentUser, setCurrentUserState] = useState<Employee>(initialUser);
   const [activities, setActivities] = useState<Activity[]>([]);
   const [loading, setLoading] = useState(true);
@@ -125,12 +153,13 @@ export function FleetProvider({ children, initialUser }: { children: ReactNode; 
   useEffect(() => {
     const loadAll = async () => {
       try {
-        const [v, e, p, d, r] = await Promise.all([
+        const [v, e, p, d, r, inv] = await Promise.all([
           supabase.from('vehicles').select('*').order('plate'),
-          supabase.from('employees').select('id, name, email, sector, role').order('name'),
+          supabase.from('employees').select('id, name, email, sector, role, inventory_role').order('name'),
           supabase.from('projects').select('*').order('name'),
           supabase.from('departments').select('*'),
           supabase.from('reservations').select('*').order('start_date'),
+          supabase.from('inventory_items').select('*').order('barcode_id'),
         ]);
 
         if (v.error) throw v.error;
@@ -138,12 +167,14 @@ export function FleetProvider({ children, initialUser }: { children: ReactNode; 
         if (p.error) throw p.error;
         if (d.error) throw d.error;
         if (r.error) throw r.error;
+        // inventory_items table may not exist yet - don't throw on error
 
         setVehicles((v.data ?? []).map(mapVehicle));
         setEmployees((e.data ?? []).map(mapEmployee));
         setProjects((p.data ?? []).map(mapProject));
         setDepartments((d.data ?? []).map(mapDepartment));
         setReservations((r.data ?? []).map(mapReservation));
+        if (!inv.error) setInventoryItems((inv.data ?? []).map(mapInventoryItem));
       } catch (err) {
         console.error('Failed to load data from Supabase:', err);
         setLoadError(true);
@@ -499,6 +530,74 @@ export function FleetProvider({ children, initialUser }: { children: ReactNode; 
     else toast.success(`Department "${department?.name}" deleted`);
   };
 
+  // ── Inventory ─────────────────────────────────────────────────────────────
+
+  const addInventoryItem = async (itemData: Omit<InventoryItem, 'id'>) => {
+    const newId = `inv-${Date.now()}`;
+    const newItem = { ...itemData, id: newId };
+    setInventoryItems(prev => [...prev, newItem]);
+
+    const { error } = await supabase.from('inventory_items').insert({
+      id: newId,
+      barcode_id: itemData.barcodeId,
+      category: itemData.category,
+      item_type: itemData.itemType,
+      manufacturer: itemData.manufacturer ?? null,
+      model: itemData.model ?? null,
+      serial_number: itemData.serialNumber ?? null,
+      year: itemData.year ?? null,
+      condition: itemData.condition,
+      department: itemData.department ?? null,
+      employee_name: itemData.employeeName ?? null,
+      location: itemData.location ?? null,
+      notes: itemData.notes ?? null,
+      assigned_date: itemData.assignedDate ?? null,
+      material: itemData.material ?? null,
+      color_desc: itemData.colorDesc ?? null,
+      dimensions: itemData.dimensions ?? null,
+    });
+
+    if (error) {
+      setInventoryItems(prev => prev.filter(i => i.id !== newId));
+      toast.error('Greška pri dodavanju stavke');
+    } else {
+      toast.success('Stavka inventara dodata');
+    }
+  };
+
+  const updateInventoryItem = async (id: string, itemData: Partial<InventoryItem>) => {
+    setInventoryItems(prev => prev.map(i => i.id === id ? { ...i, ...itemData } : i));
+
+    const db: Record<string, unknown> = {};
+    if (itemData.barcodeId !== undefined) db.barcode_id = itemData.barcodeId;
+    if (itemData.category !== undefined) db.category = itemData.category;
+    if (itemData.itemType !== undefined) db.item_type = itemData.itemType;
+    if (itemData.manufacturer !== undefined) db.manufacturer = itemData.manufacturer;
+    if (itemData.model !== undefined) db.model = itemData.model;
+    if (itemData.serialNumber !== undefined) db.serial_number = itemData.serialNumber;
+    if (itemData.year !== undefined) db.year = itemData.year;
+    if (itemData.condition !== undefined) db.condition = itemData.condition;
+    if (itemData.department !== undefined) db.department = itemData.department;
+    if (itemData.employeeName !== undefined) db.employee_name = itemData.employeeName;
+    if (itemData.location !== undefined) db.location = itemData.location;
+    if (itemData.notes !== undefined) db.notes = itemData.notes;
+    if (itemData.assignedDate !== undefined) db.assigned_date = itemData.assignedDate;
+    if (itemData.material !== undefined) db.material = itemData.material;
+    if (itemData.colorDesc !== undefined) db.color_desc = itemData.colorDesc;
+    if (itemData.dimensions !== undefined) db.dimensions = itemData.dimensions;
+
+    const { error } = await supabase.from('inventory_items').update(db).eq('id', id);
+    if (error) toast.error('Greška pri ažuriranju stavke');
+    else toast.success('Stavka ažurirana');
+  };
+
+  const deleteInventoryItem = async (id: string) => {
+    setInventoryItems(prev => prev.filter(i => i.id !== id));
+    const { error } = await supabase.from('inventory_items').delete().eq('id', id);
+    if (error) toast.error('Greška pri brisanju stavke');
+    else toast.success('Stavka obrisana');
+  };
+
   // ── Auth ──────────────────────────────────────────────────────────────────
 
   const setCurrentUser = (user: Employee) => setCurrentUserState(user);
@@ -586,6 +685,7 @@ export function FleetProvider({ children, initialUser }: { children: ReactNode; 
     employees,
     projects,
     departments,
+    inventoryItems,
     currentUser,
     activities,
     addVehicle,
@@ -606,6 +706,9 @@ export function FleetProvider({ children, initialUser }: { children: ReactNode; 
     addDepartment,
     updateDepartment,
     deleteDepartment,
+    addInventoryItem,
+    updateInventoryItem,
+    deleteInventoryItem,
     setCurrentUser,
     logout,
     changePassword,

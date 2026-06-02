@@ -16,6 +16,8 @@ import { SettingsModal } from './components/SettingsModal';
 import { CalendarPage } from './components/CalendarPage';
 import { MyReservationsPage } from './components/MyReservationsPage';
 import { AdminPage } from './components/AdminPage';
+import { InventoryAdminPage } from './components/InventoryAdminPage';
+import { MyInventoryPage } from './components/MyInventoryPage';
 import { LoginPage, type Platform } from './components/LoginPage';
 import { VacationApp } from './components/vacation/VacationApp';
 import { ThemeProvider } from './context/ThemeContext';
@@ -52,11 +54,16 @@ function AppContent({ onSwitchToVacation }: { onSwitchToVacation: () => void }) 
   const [dateRange, setDateRange] = useState({ start: todayStr, end: nextWeek.toISOString().split('T')[0] });
   const [filtersApplied, setFiltersApplied] = useState(false);
 
+  const isInventoryAdmin = currentUser.inventoryRole === 'admin';
+
   useEffect(() => {
     if (currentUser.role !== 'admin' && (activeView === 'admin' || activeView === 'calendar')) {
       setActiveView('dashboard');
     }
-  }, [currentUser.role, activeView]);
+    if (!isInventoryAdmin && activeView === 'inventory-admin') {
+      setActiveView('dashboard');
+    }
+  }, [currentUser.role, currentUser.inventoryRole, activeView, isInventoryAdmin]);
 
   const filteredVehicles = useMemo(() => {
     return vehicles.filter(vehicle => {
@@ -108,6 +115,20 @@ function AppContent({ onSwitchToVacation }: { onSwitchToVacation: () => void }) 
 
       case 'my-reservations':
         return <MyReservationsPage reservations={reservations} />;
+
+      case 'my-inventory':
+        return <MyInventoryPage />;
+
+      case 'inventory-admin':
+        if (!isInventoryAdmin) {
+          return (
+            <div className="bg-app-surface border border-app-line rounded-xl p-12 text-center">
+              <h2 className="text-2xl font-semibold text-white mb-2">Pristup odbijen</h2>
+              <p className="text-gray-400">Nemate dozvolu za upravljanje inventarom.</p>
+            </div>
+          );
+        }
+        return <InventoryAdminPage />;
 
       case 'admin':
         if (currentUser.role !== 'admin') {
@@ -181,6 +202,7 @@ function AppContent({ onSwitchToVacation }: { onSwitchToVacation: () => void }) 
         setActiveView={setActiveView}
         onSettingsClick={() => setIsSettingsModalOpen(true)}
         isAdmin={currentUser.role === 'admin'}
+        isInventoryAdmin={isInventoryAdmin}
         onSwitchToVacation={onSwitchToVacation}
       />
 
@@ -241,7 +263,7 @@ export default function App() {
     setLoadingUser(true);
     supabase
       .from('employees')
-      .select('id, name, email, sector, role, vacation_role, vacation_days_total')
+      .select('id, name, email, sector, role, vacation_role, vacation_days_total, inventory_role')
       .eq('id', loggedInUserId)
       .single()
       .then(({ data, error }) => {
@@ -258,6 +280,7 @@ export default function App() {
             role: data.role as 'admin' | 'user',
             vacationRole: data.vacation_role ?? 'user',
             vacationDaysTotal: data.vacation_days_total ?? 20,
+            inventoryRole: data.inventory_role ?? 'user',
           });
         }
         setLoadingUser(false);

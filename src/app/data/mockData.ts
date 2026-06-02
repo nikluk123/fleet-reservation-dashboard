@@ -42,11 +42,32 @@ export interface Employee {
   role: 'user' | 'admin';
   vacationRole?: 'user' | 'sector_admin' | 'admin';
   vacationDaysTotal?: number;
+  inventoryRole?: 'user' | 'admin';
   jobTitle?: string;
   educationLevel?: 'SSS' | 'VSS';
   nesStartDate?: string;
   hasChildrenUnder15?: boolean;
   isSingleParent?: boolean;
+}
+
+export interface InventoryItem {
+  id: string;
+  barcodeId: string;
+  category: 'IT' | 'Namestaj';
+  itemType: string;
+  manufacturer?: string;
+  model?: string;
+  serialNumber?: string;
+  year?: number;
+  condition: string;
+  department?: string;
+  employeeName?: string;
+  location?: string;
+  notes?: string;
+  assignedDate?: string;
+  material?: string;
+  colorDesc?: string;
+  dimensions?: string;
 }
 
 // Returns date string for current week: offset 0=Mon, 1=Tue, ..., 6=Sun

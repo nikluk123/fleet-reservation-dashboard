@@ -1,4 +1,4 @@
-import { LayoutDashboard, Calendar, ClipboardList, Settings, Shield, LogOut } from 'lucide-react';
+import { LayoutDashboard, Calendar, ClipboardList, Settings, Shield, LogOut, Package, Armchair } from 'lucide-react';
 import { useFleet } from '../context/FleetContext';
 
 interface SidebarProps {
@@ -6,20 +6,27 @@ interface SidebarProps {
   setActiveView: (view: string) => void;
   onSettingsClick: () => void;
   isAdmin?: boolean;
+  isInventoryAdmin?: boolean;
   onSwitchToVacation?: () => void;
 }
 
 const allMenuItems = [
-  { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard, adminOnly: false },
-  { id: 'calendar', label: 'Reservations Calendar', icon: Calendar, adminOnly: true },
-  { id: 'my-reservations', label: 'My Reservations', icon: ClipboardList, adminOnly: false },
-  { id: 'admin', label: 'Admin Panel', icon: Shield, adminOnly: true },
+  { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard, adminOnly: false, inventoryAdminOnly: false },
+  { id: 'calendar', label: 'Reservations Calendar', icon: Calendar, adminOnly: true, inventoryAdminOnly: false },
+  { id: 'my-reservations', label: 'My Reservations', icon: ClipboardList, adminOnly: false, inventoryAdminOnly: false },
+  { id: 'my-inventory', label: 'Moj inventar', icon: Package, adminOnly: false, inventoryAdminOnly: false },
+  { id: 'admin', label: 'Admin Panel', icon: Shield, adminOnly: true, inventoryAdminOnly: false },
+  { id: 'inventory-admin', label: 'Inventar', icon: Armchair, adminOnly: false, inventoryAdminOnly: true },
 ];
 
-export function Sidebar({ activeView, setActiveView, onSettingsClick, isAdmin = false, onSwitchToVacation }: SidebarProps) {
+export function Sidebar({ activeView, setActiveView, onSettingsClick, isAdmin = false, isInventoryAdmin = false, onSwitchToVacation }: SidebarProps) {
   const { currentUser, logout } = useFleet();
 
-  const menuItems = allMenuItems.filter(item => !item.adminOnly || isAdmin);
+  const menuItems = allMenuItems.filter(item => {
+    if (item.adminOnly && !isAdmin) return false;
+    if (item.inventoryAdminOnly && !isInventoryAdmin) return false;
+    return true;
+  });
 
   return (
     <aside className="w-64 bg-app-surface border-r border-app-line flex flex-col">
