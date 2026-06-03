@@ -14,7 +14,7 @@ const allMenuItems = [
   { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard, adminOnly: false, inventoryAdminOnly: false },
   { id: 'calendar', label: 'Reservations Calendar', icon: Calendar, adminOnly: true, inventoryAdminOnly: false },
   { id: 'my-reservations', label: 'My Reservations', icon: ClipboardList, adminOnly: false, inventoryAdminOnly: false },
-  { id: 'my-inventory', label: 'Moj inventar', icon: Package, adminOnly: false, inventoryAdminOnly: false },
+  { id: 'my-inventory', label: 'My Inventory', icon: Package, adminOnly: false, inventoryAdminOnly: false },
   { id: 'admin', label: 'Admin Panel', icon: Shield, adminOnly: true, inventoryAdminOnly: false },
   { id: 'inventory-admin', label: 'Inventar', icon: Armchair, adminOnly: false, inventoryAdminOnly: true },
 ];

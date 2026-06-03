@@ -103,9 +103,10 @@ export function MyInventoryPage() {
   const { inventoryItems, currentUser } = useFleet();
 
   const myItems = useMemo(() => {
-    const userName = currentUser.name.trim().toLowerCase();
+    const normalize = (s: string) => s.trim().toLowerCase().normalize('NFC');
+    const userName = normalize(currentUser.name);
     return inventoryItems.filter(item =>
-      item.employeeName?.trim().toLowerCase() === userName
+      item.employeeName ? normalize(item.employeeName) === userName : false
     );
   }, [inventoryItems, currentUser.name]);
 
