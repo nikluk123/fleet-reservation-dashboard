@@ -1,5 +1,6 @@
 import { useState, useMemo } from 'react';
-import { Search, Plus, Edit, Trash2, Save, X, Package, Armchair } from 'lucide-react';
+import { Search, Plus, Edit, Trash2, Save, X, Package, Armchair, Download } from 'lucide-react';
+import * as XLSX from 'xlsx';
 import { useFleet } from '../context/FleetContext';
 import { type InventoryItem } from '../data/mockData';
 
@@ -224,6 +225,41 @@ export function InventoryAdminPage() {
     }
   };
 
+  const exportToExcel = () => {
+    const rows = filtered.map(item => ({
+      'Barcode ID': item.barcodeId,
+      'Kategorija': item.category === 'IT' ? 'IT Oprema' : 'Nameštaj',
+      'Tip': item.itemType,
+      'Proizvođač': item.manufacturer ?? '',
+      'Model': item.model ?? '',
+      'Serijski broj': item.serialNumber ?? '',
+      'Materijal': item.material ?? '',
+      'Boja / Opis': item.colorDesc ?? '',
+      'Dimenzije': item.dimensions ?? '',
+      'Godina': item.year ?? '',
+      'Stanje': item.condition,
+      'Zaposleni': item.employeeName ?? '',
+      'Služba / Sektor': item.department ?? '',
+      'Lokacija': item.location ?? '',
+      'Datum zaduženja': item.assignedDate ?? '',
+      'Napomena': item.notes ?? '',
+    }));
+
+    const ws = XLSX.utils.json_to_sheet(rows);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, 'Inventar');
+
+    const colWidths = [
+      { wch: 10 }, { wch: 12 }, { wch: 20 }, { wch: 16 }, { wch: 18 },
+      { wch: 18 }, { wch: 14 }, { wch: 14 }, { wch: 14 }, { wch: 8 },
+      { wch: 12 }, { wch: 22 }, { wch: 24 }, { wch: 16 }, { wch: 16 }, { wch: 24 },
+    ];
+    ws['!cols'] = colWidths;
+
+    const label = activeCategory === 'all' ? 'svi' : activeCategory === 'IT' ? 'IT' : 'namestaj';
+    XLSX.writeFile(wb, `inventar_${label}_${new Date().toISOString().slice(0, 10)}.xlsx`);
+  };
+
   return (
     <div className="space-y-6">
       {/* Summary */}
@@ -267,12 +303,20 @@ export function InventoryAdminPage() {
       <div className="bg-app-surface border border-app-line rounded-xl p-6">
         <div className="flex items-center justify-between mb-6">
           <h2 className="text-white font-semibold text-xl">Inventar</h2>
-          <button
-            onClick={handleNew}
-            className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors text-sm"
-          >
-            <Plus className="w-4 h-4" /> Nova stavka
-          </button>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={exportToExcel}
+              className="flex items-center gap-2 px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg transition-colors text-sm"
+            >
+              <Download className="w-4 h-4" /> Izvezi Excel
+            </button>
+            <button
+              onClick={handleNew}
+              className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors text-sm"
+            >
+              <Plus className="w-4 h-4" /> Nova stavka
+            </button>
+          </div>
         </div>
 
         {/* Filters */}
